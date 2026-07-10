@@ -1,0 +1,13 @@
+{
+  "name": "chinese-ipad-app",
+  "version": "0.2.0",
+  "description": "Mandarin enrichment iPad practice app + teacher dashboard (Levels/Units/Challenges). Runs locally via server.js (in-memory), or deployed on Vercel via /api functions + Upstash Redis.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@upstash/redis": "^1.34.3"
+  }
+}

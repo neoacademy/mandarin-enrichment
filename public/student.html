@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Mandarin Practice</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- PERSISTENT HEADER -->
+<div class="app-header" id="app-header">
+  <button class="home-btn" id="home-btn" title="Home">🏠</button>
+  <span class="student-name" id="header-name"></span>
+  <span class="points-badge" id="header-points">⭐ 0 pts</span>
+</div>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <h1>Mandarin Practice</h1>
+  <p class="subtitle">Choose your name to start</p>
+  <select id="name-select">
+    <option value="">Choose your name...</option>
+  </select>
+  <button id="start-btn" disabled>Start</button>
+</div>
+
+<!-- HOME: LEVEL SELECT -->
+<div id="screen-home" class="screen">
+  <h1>Levels</h1>
+  <p class="subtitle">Pick a level to see its units</p>
+  <div class="card-list" id="level-list"></div>
+</div>
+
+<!-- LEVEL: UNIT SELECT -->
+<div id="screen-level" class="screen">
+  <h1 id="level-title">Level 1</h1>
+  <p class="subtitle" id="level-subtitle">Beginner</p>
+  <div class="card-list" id="unit-list"></div>
+  <button class="ghost" id="level-back-btn">Back to Levels</button>
+</div>
+
+<!-- UNIT: CHALLENGE LIST -->
+<div id="screen-unit" class="screen">
+  <h1 id="unit-title">Unit 1</h1>
+  <p class="subtitle" id="unit-theme">Numbers 1–10</p>
+  <div class="unit-complete-banner" id="unit-complete-banner" style="display:none;">🎉 Unit complete! Great job!</div>
+  <div class="card-list" id="challenge-list"></div>
+  <button class="ghost" id="unit-back-btn">Back to Level</button>
+</div>
+
+<!-- FLASHCARDS -->
+<div id="screen-flashcards" class="screen">
+  <p class="subtitle" id="fc-title">Learn</p>
+  <div class="card">
+    <p class="hanzi" id="fc-hanzi">一</p>
+    <p class="pinyin" id="fc-pinyin">yī</p>
+    <p class="numeral" id="fc-numeral">1</p>
+  </div>
+  <button class="speak-btn" id="fc-speak">🔊 Tap to hear</button>
+  <div class="progress-dots" id="fc-dots"></div>
+  <div class="nav-row">
+    <button class="ghost" id="fc-prev">Back</button>
+    <button id="fc-next">Next</button>
+  </div>
+</div>
+
+<!-- MATCHING GAME -->
+<div id="screen-match" class="screen">
+  <p class="subtitle">Match</p>
+  <p>Tap a character, then tap its pinyin</p>
+  <div class="match-grid">
+    <div class="match-col" id="match-hanzi-col"></div>
+    <div class="match-col" id="match-pinyin-col"></div>
+  </div>
+  <button id="match-continue" style="margin-top:20px;" disabled>Continue</button>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <p class="subtitle" id="quiz-progress">Quiz (Question 1 of 6)</p>
+  <p class="quiz-question" id="quiz-question">What number is this?</p>
+  <div class="quiz-options" id="quiz-options"></div>
+</div>
+
+<!-- CHALLENGE COMPLETE -->
+<div id="screen-challenge-done" class="screen">
+  <div class="points-earned-banner">
+    <div class="checkpoint-label">You earned</div>
+    <div class="points-earned-value" id="cd-points">+10</div>
+    <div class="checkpoint-label">points!</div>
+  </div>
+  <p class="checkpoint-instruction" id="cd-instruction">Nice work!</p>
+  <button id="cd-continue">Continue</button>
+</div>
+
+<script src="student.js"></script>
+</body>
+</html>

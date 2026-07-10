@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Teacher Dashboard</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; background: #F4F2EE; margin: 0; padding: 20px; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  h1 { font-size: 1.4rem; margin: 0; }
+  .legend { display: flex; gap: 14px; font-size: 0.85rem; color: #555; flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  .tile {
+    border-radius: 14px;
+    padding: 14px;
+    color: white;
+    min-height: 95px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .tile .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+  .tile .name { font-weight: 700; font-size: 1rem; }
+  .tile .points { font-size: 0.8rem; background: rgba(0,0,0,0.18); border-radius: 10px; padding: 2px 8px; white-space: nowrap; }
+  .tile .status { font-size: 0.82rem; opacity: 0.95; margin-top: 6px; }
+  .tile.not-started { background: #B0B0B0; }
+  .tile.in-progress { background: #4A90D9; }
+  .tile.great { background: #4CAF50; }
+  .tile.needs-help { background: #E8491D; }
+  #reset-btn {
+    background: #2B2B2B; color: white; border: none; border-radius: 10px;
+    padding: 10px 18px; font-size: 0.95rem; cursor: pointer;
+  }
+  .summary { font-size: 0.9rem; color: #555; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Live class status</h1>
+    <button id="reset-btn">Reset class</button>
+  </header>
+  <div class="legend">
+    <span><span class="swatch" style="background:#B0B0B0"></span> Not started</span>
+    <span><span class="swatch" style="background:#4A90D9"></span> In progress</span>
+    <span><span class="swatch" style="background:#4CAF50"></span> Mastered a unit</span>
+    <span><span class="swatch" style="background:#E8491D"></span> Needs help</span>
+  </div>
+  <p class="summary" id="summary"></p>
+  <div class="grid" id="grid"></div>
+
+<script>
+// Every unit's quiz challenge in student.js uses the same 30-point max
+// (see standardChallenges()), so we can spot struggling/mastered students
+// by scanning any completed challenge key ending in "-quiz" without
+// needing to know which specific unit they're in.
+const QUIZ_MAX = 30;
+
+function classify(student) {
+  if (!student || (!student.location && (!student.totalPoints || student.totalPoints === 0))) {
+    return { cls: "not-started", label: "Not started" };
+  }
+  const quizEntries = Object.entries(student.completed || {}).filter(([k]) => k.endsWith("-quiz"));
+  const struggling = quizEntries.find(([, pts]) => pts < QUIZ_MAX / 2);
+  if (struggling) {
+    return { cls: "needs-help", label: `Quiz: ${struggling[1]}/${QUIZ_MAX} pts` };
+  }
+  const mastered = quizEntries.find(([, pts]) => pts >= QUIZ_MAX - 5);
+  if (mastered) {
+    return { cls: "great", label: student.location || "Doing great! 🎉" };
+  }
+  return { cls: "in-progress", label: student.location || "Practicing" };
+}
+
+async function refresh() {
+  try {
+    const [rosterRes, statusRes] = await Promise.all([
+      fetch("/api/roster"),
+      fetch("/api/status"),
+    ]);
+    const roster = await rosterRes.json();
+    const status = await statusRes.json();
+
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    let activeCount = 0;
+    let needsHelpCount = 0;
+
+    roster.forEach((name) => {
+      const student = status[name];
+      const { cls, label } = classify(student);
+      const points = (student && student.totalPoints) || 0;
+      if (student && points > 0) activeCount++;
+      if (cls === "needs-help") needsHelpCount++;
+
+      const tile = document.createElement("div");
+      tile.className = "tile " + cls;
+      tile.innerHTML = `
+        <div class="top-row">
+          <div class="name">${name}</div>
+          <div class="points">⭐ ${points}</div>
+        </div>
+        <div class="status">${label}</div>
+      `;
+      grid.appendChild(tile);
+    });
+
+    document.getElementById("summary").textContent =
+      `${activeCount} of ${roster.length} have started` +
+      (needsHelpCount ? ` — ${needsHelpCount} need help` : "");
+  } catch (e) {
+    console.warn("Refresh failed:", e);
+  }
+}
+
+document.getElementById("reset-btn").addEventListener("click", async () => {
+  if (!confirm("Reset progress for the whole class?")) return;
+  await fetch("/api/reset", { method: "POST" });
+  refresh();
+});
+
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>

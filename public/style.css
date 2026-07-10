@@ -1,0 +1,213 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  background: #FFF8EE;
+  color: #2B2B2B;
+  min-height: 100vh;
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 24px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.screen.active { display: flex; }
+
+h1 { font-size: 1.6rem; margin-bottom: 4px; }
+.subtitle { color: #7A7A7A; margin-top: 0; margin-bottom: 24px; }
+
+button {
+  font-family: inherit;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 28px;
+  margin: 8px;
+  cursor: pointer;
+  background: #E8491D;
+  color: white;
+  font-weight: 600;
+  min-width: 120px;
+}
+button:active { transform: scale(0.97); }
+button.secondary { background: #FFD469; color: #2B2B2B; }
+button.ghost { background: #EDEDED; color: #2B2B2B; }
+button:disabled { opacity: 0.4; cursor: default; }
+
+select, input[type=text] {
+  font-size: 1.2rem;
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px solid #DDD;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
+/* Flashcards */
+.card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 40px 60px;
+  margin-bottom: 24px;
+  min-width: 260px;
+}
+.hanzi { font-size: 5rem; margin: 0; }
+.pinyin { font-size: 1.8rem; color: #E8491D; margin: 8px 0 0; }
+.numeral { font-size: 1.2rem; color: #7A7A7A; margin-top: 4px; }
+
+.progress-dots { display: flex; gap: 6px; margin: 16px 0; flex-wrap: wrap; justify-content: center; max-width: 320px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #E5E5E5; }
+.dot.done { background: #E8491D; }
+
+.nav-row { display: flex; gap: 8px; }
+
+/* Matching game */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; max-width: 500px; }
+.match-col { display: flex; flex-direction: column; gap: 10px; }
+.tile {
+  background: white;
+  border: 3px solid #E5E5E5;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.tile.selected { border-color: #FFD469; background: #FFF6DD; }
+.tile.matched { border-color: #4CAF50; background: #EAF7EA; opacity: 0.5; pointer-events: none; }
+.tile.wrong { border-color: #E8491D; background: #FDEAE4; }
+
+/* Quiz */
+.quiz-question { font-size: 1.4rem; margin-bottom: 20px; }
+.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 480px; }
+.opt-btn {
+  background: white;
+  border: 3px solid #E5E5E5;
+  color: #2B2B2B;
+  font-size: 1.6rem;
+  padding: 20px;
+  border-radius: 16px;
+}
+.opt-btn.correct { border-color: #4CAF50; background: #EAF7EA; }
+.opt-btn.incorrect { border-color: #E8491D; background: #FDEAE4; }
+
+/* Checkpoint */
+.checkpoint-banner {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 24px;
+  padding: 32px;
+  color: white;
+  margin-bottom: 16px;
+}
+.checkpoint-banner.great { background: #4CAF50; }
+.checkpoint-banner.ok { background: #FFA726; }
+.checkpoint-banner.needs-help { background: #E8491D; }
+.checkpoint-score { font-size: 3rem; font-weight: 700; margin: 8px 0; }
+.checkpoint-label { font-size: 1.3rem; }
+.checkpoint-instruction { font-size: 1.1rem; color: #7A7A7A; margin-top: 8px; }
+
+.speak-btn { background: #FFD469; color: #2B2B2B; font-size: 1.4rem; }
+
+/* Persistent top banner */
+.app-header {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: #2B2B2B;
+  color: white;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+}
+.app-header.visible { display: flex; }
+.app-header .home-btn { font-size: 1.4rem; cursor: pointer; background: none; padding: 6px; margin: 0; min-width: auto; }
+.app-header .student-name { font-size: 0.9rem; opacity: 0.85; }
+.app-header .points-badge {
+  background: #FFD469;
+  color: #2B2B2B;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.screen { padding-top: 84px; }
+
+/* Level / unit selection */
+.card-list { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 14px; }
+
+.level-card, .unit-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  text-align: left;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+.level-card.locked, .unit-card.locked { opacity: 0.55; cursor: default; }
+.level-card .title, .unit-card .title { font-size: 1.2rem; font-weight: 700; }
+.level-card .meta, .unit-card .meta { color: #7A7A7A; font-size: 0.9rem; margin-top: 4px; }
+.badge-soon {
+  display: inline-block;
+  background: #EDEDED;
+  color: #7A7A7A;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Challenge list */
+.challenge-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  cursor: pointer;
+  border: 3px solid transparent;
+  text-align: left;
+}
+.challenge-card.done { border-color: #4CAF50; }
+.challenge-card .cc-text { flex: 1; }
+.challenge-card .cc-title { font-weight: 700; font-size: 1.05rem; }
+.challenge-card .cc-desc { color: #7A7A7A; font-size: 0.85rem; margin-top: 2px; }
+.challenge-card .cc-points { font-weight: 700; color: #E8491D; font-size: 0.95rem; white-space: nowrap; margin-left: 10px; }
+.challenge-card .cc-check { color: #4CAF50; font-size: 1.3rem; margin-left: 8px; }
+
+.unit-complete-banner {
+  background: #4CAF50;
+  color: white;
+  border-radius: 16px;
+  padding: 14px 20px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  width: 100%;
+  max-width: 520px;
+}
+
+/* Challenge complete screen */
+.points-earned-banner {
+  background: #FFD469;
+  border-radius: 24px;
+  padding: 32px;
+  width: 100%;
+  max-width: 380px;
+  margin-bottom: 16px;
+}
+.points-earned-value { font-size: 3rem; font-weight: 800; color: #2B2B2B; margin: 4px 0; }
