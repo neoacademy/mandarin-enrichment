@@ -154,6 +154,11 @@ let fcReadCorrect = new Set();
 // connection. Feature-detected so the button hides where it's unavailable.
 const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
 let fcRecognizing = false;
+// Hold-to-record state: the student presses and holds "Read it" to record,
+// sees a live waveform, and releases to run the pronunciation check.
+let fcRecording = false;
+let fcStream = null, fcAudioCtx = null, fcAnalyser = null, fcRaf = null;
+let fcRec = null, fcTarget = null, fcHeardMatch = false, fcLastHeard = "";
 
 // The sign-in page's "Preview the student app" button opens this page with
 // ?preview=1, which puts it into a no-login sandbox: no Google sign-in is
@@ -550,8 +555,8 @@ function setReadFeedback(state, msg) {
 function resetReadButton() {
   const btn = $("fc-read");
   btn.disabled = false;
-  btn.classList.remove("listening");
-  btn.textContent = "🎤 Read it";
+  btn.classList.remove("recording");
+  btn.textContent = "🎤 Hold to read";
 }
 
 function normalizeSpoken(s) {
@@ -572,58 +577,148 @@ function readingMatches(heard, item) {
   return acceptableAnswers(item).some((t) => h === t || h.includes(t) || t.includes(h));
 }
 
-function startReading() {
-  if (!SpeechRecognitionAPI || fcRecognizing) return;
-  const target = currentUnit.vocab[fcIndex];
+// Press-and-hold: begin recording + show the live waveform, then check on release.
+function beginReading() {
+  if (!SpeechRecognitionAPI || fcRecording) return;
+  fcTarget = currentUnit.vocab[fcIndex];
+  fcHeardMatch = false;
+  fcLastHeard = "";
+  fcRecording = true;
 
   // Stop any text-to-speech so the mic doesn't pick up the app's own audio.
   if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 
-  const rec = new SpeechRecognitionAPI();
-  rec.lang = "zh-CN";
-  rec.interimResults = false;
-  rec.maxAlternatives = 3;
-
-  fcRecognizing = true;
   const btn = $("fc-read");
-  btn.disabled = true;
-  btn.classList.add("listening");
-  btn.textContent = "🎧 Listening…";
+  btn.classList.add("recording");
+  btn.textContent = "🎙️ Recording… (release to check)";
   setReadFeedback("listening", "Say the word now…");
 
+  startWaveform();
+  startRecognition();
+}
+
+function endReading() {
+  if (!fcRecording) return;
+  fcRecording = false;
+
+  const btn = $("fc-read");
+  btn.classList.remove("recording");
+  btn.textContent = "🎤 Hold to read";
+
+  stopWaveform();
+  if (fcRec) { try { fcRec.stop(); } catch (e) {} }
+
+  setReadFeedback("listening", "Analyzing…");
+  // Give the engine a moment to deliver its final transcript, then decide.
+  setTimeout(finalizeReading, 700);
+}
+
+function endReadingIfRecording() { if (fcRecording) endReading(); }
+
+function finalizeReading() {
+  if (!fcTarget || fcReadCorrect.has(fcTarget.id)) return;
+  if (fcHeardMatch) {
+    onReadCorrect(fcTarget);
+  } else {
+    setReadFeedback(
+      "retry",
+      fcLastHeard
+        ? `Heard “${fcLastHeard}”. Not quite — hold 🎤 and try again.`
+        : "Didn't catch that — hold 🎤 and try again."
+    );
+  }
+}
+
+function startRecognition() {
+  let rec;
+  try { rec = new SpeechRecognitionAPI(); } catch (e) { return; }
+  fcRec = rec;
+  rec.lang = "zh-CN";
+  rec.interimResults = true;
+  try { rec.continuous = true; } catch (e) {}
+  rec.maxAlternatives = 3;
+
   rec.onresult = (e) => {
-    const alts = [];
-    const r = e.results[0];
-    for (let i = 0; i < r.length; i++) alts.push(r[i].transcript);
-    if (alts.some((a) => readingMatches(a, target))) {
-      onReadCorrect(target);
-    } else {
-      setReadFeedback("retry", `Heard “${alts[0] || "…"}”. Not quite — tap 🎤 to try again.`);
+    let last = "";
+    const start = e.resultIndex != null ? e.resultIndex : 0;
+    for (let i = start; i < e.results.length; i++) {
+      const r = e.results[i];
+      for (let j = 0; j < r.length; j++) {
+        if (j === 0) last = r[j].transcript;
+        if (readingMatches(r[j].transcript, fcTarget)) fcHeardMatch = true;
+      }
+    }
+    if (last) fcLastHeard = last;
+    if (fcRecording) {
+      setReadFeedback("listening", fcHeardMatch ? "✓ got it — release to check" : `Listening… “${fcLastHeard || "…"}”`);
     }
   };
   rec.onerror = (e) => {
     if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+      fcRecording = false;
+      resetReadButton();
+      stopWaveform();
       setReadFeedback("retry", "🎤 Allow microphone access to read aloud.");
-    } else if (e.error === "no-speech") {
-      setReadFeedback("retry", "Didn't hear anything — tap 🎤 and try again.");
-    } else {
-      setReadFeedback("retry", "Didn't catch that — tap 🎤 to try again.");
     }
   };
-  rec.onend = () => {
-    fcRecognizing = false;
-    // Leave a correct card's reward in place; otherwise reset the button so
-    // the student can retry.
-    if (!fcReadCorrect.has(target.id)) resetReadButton();
-  };
+  rec.onend = () => { fcRecognizing = false; };
 
+  try { rec.start(); fcRecognizing = true; } catch (e) {}
+}
+
+// ---- live waveform (Web Audio) ---------------------------------------------
+async function startWaveform() {
+  const canvas = $("fc-waveform");
+  if (!canvas || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  canvas.classList.add("active");
   try {
-    rec.start();
+    fcStream = await navigator.mediaDevices.getUserMedia({ audio: true });
   } catch (e) {
-    fcRecognizing = false;
-    resetReadButton();
-    setReadFeedback("retry", "Couldn't start the mic — tap 🎤 to try again.");
+    canvas.classList.remove("active"); // no mic for visuals; recognition may still work
+    return;
   }
+  if (!fcRecording) { stopStream(); canvas.classList.remove("active"); return; } // released already
+
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  fcAudioCtx = new Ctx();
+  const src = fcAudioCtx.createMediaStreamSource(fcStream);
+  fcAnalyser = fcAudioCtx.createAnalyser();
+  fcAnalyser.fftSize = 1024;
+  src.connect(fcAnalyser);
+
+  const data = new Uint8Array(fcAnalyser.fftSize);
+  const ctx = canvas.getContext("2d");
+  const draw = () => {
+    fcRaf = requestAnimationFrame(draw);
+    fcAnalyser.getByteTimeDomainData(data);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "#4A90D9";
+    ctx.beginPath();
+    const slice = canvas.width / data.length;
+    let x = 0;
+    for (let i = 0; i < data.length; i++) {
+      const y = (data[i] / 128.0) * (canvas.height / 2);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      x += slice;
+    }
+    ctx.stroke();
+  };
+  draw();
+}
+
+function stopWaveform() {
+  const canvas = $("fc-waveform");
+  if (canvas) canvas.classList.remove("active");
+  if (fcRaf) { cancelAnimationFrame(fcRaf); fcRaf = null; }
+  if (fcAudioCtx) { try { fcAudioCtx.close(); } catch (e) {} fcAudioCtx = null; }
+  fcAnalyser = null;
+  stopStream();
+}
+
+function stopStream() {
+  if (fcStream) { fcStream.getTracks().forEach((t) => t.stop()); fcStream = null; }
 }
 
 function onReadCorrect(item) {
@@ -643,7 +738,12 @@ function onReadCorrect(item) {
 }
 
 $("fc-speak").addEventListener("click", () => speak(currentUnit.vocab[fcIndex].hanzi));
-$("fc-read").addEventListener("click", startReading);
+
+// Hold-to-record: press starts recording, release (anywhere) runs the check.
+$("fc-read").addEventListener("pointerdown", (e) => { e.preventDefault(); beginReading(); });
+$("fc-read").addEventListener("contextmenu", (e) => e.preventDefault());
+window.addEventListener("pointerup", endReadingIfRecording);
+window.addEventListener("pointercancel", endReadingIfRecording);
 $("fc-prev").addEventListener("click", () => {
   if (fcIndex > 0) { fcIndex--; renderFlashcard(currentUnit); }
 });
