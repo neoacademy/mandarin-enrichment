@@ -176,6 +176,297 @@ const L12_REVIEW_VOCAB = [
   { id: 12, hanzi: "喜欢", pinyin: "xǐhuan", meaning: "to like" },
 ];
 
+// ------------------------------------------------------------
+// YCT 2 Standard Course — Level 2. Same "Let's learn" extraction as YCT 1.
+// ------------------------------------------------------------
+
+// Lesson 1 — 我可以坐这儿吗？(May I sit here?)
+const YCT2_L1_SIT_VOCAB = [
+  { id: 1, hanzi: "可以", pinyin: "kěyǐ", meaning: "may" },
+  { id: 2, hanzi: "坐", pinyin: "zuò", meaning: "sit" },
+  { id: 3, hanzi: "请", pinyin: "qǐng", meaning: "please" },
+  { id: 4, hanzi: "不客气", pinyin: "bú kèqi", meaning: "you're welcome" },
+  { id: 5, hanzi: "不要", pinyin: "bú yào", meaning: "don't" },
+  { id: 6, hanzi: "说话", pinyin: "shuōhuà", meaning: "to talk, to speak" },
+  { id: 7, hanzi: "对不起", pinyin: "duìbuqǐ", meaning: "sorry" },
+  { id: 8, hanzi: "没关系", pinyin: "méi guānxi", meaning: "never mind" },
+];
+
+// Lesson 2 — 你早上几点起床？(When do you get up in the morning?)
+const YCT2_L2_MORNING_VOCAB = [
+  { id: 1, hanzi: "起床", pinyin: "qǐchuáng", meaning: "get up" },
+  { id: 2, hanzi: "睡觉", pinyin: "shuìjiào", meaning: "sleep, go to bed" },
+  { id: 3, hanzi: "早上", pinyin: "zǎoshang", meaning: "morning" },
+  { id: 4, hanzi: "晚上", pinyin: "wǎnshang", meaning: "evening, night" },
+  { id: 5, hanzi: "到", pinyin: "dào", meaning: "until, up to" },
+  { id: 6, hanzi: "呢", pinyin: "ne", meaning: "question particle" },
+  { id: 7, hanzi: "要", pinyin: "yào", meaning: "to want" },
+];
+
+// Lesson 3 — 你的铅笔呢？(Where is your pencil?)
+const YCT2_L3_PENCIL_VOCAB = [
+  { id: 1, hanzi: "房间", pinyin: "fángjiān", meaning: "room" },
+  { id: 2, hanzi: "电视", pinyin: "diànshì", meaning: "television" },
+  { id: 3, hanzi: "床", pinyin: "chuáng", meaning: "bed" },
+  { id: 4, hanzi: "桌子", pinyin: "zhuōzi", meaning: "table" },
+  { id: 5, hanzi: "椅子", pinyin: "yǐzi", meaning: "chair" },
+  { id: 6, hanzi: "铅笔", pinyin: "qiānbǐ", meaning: "pencil" },
+  { id: 7, hanzi: "书包", pinyin: "shūbāo", meaning: "schoolbag" },
+  { id: 8, hanzi: "里面", pinyin: "lǐmian", meaning: "inside" },
+  { id: 9, hanzi: "上边", pinyin: "shàngbian", meaning: "on top" },
+  { id: 10, hanzi: "矮", pinyin: "ǎi", meaning: "short (height)" },
+];
+
+// Lesson 4 — 书包里有两本书。(There are two books in the schoolbag.)
+const YCT2_L4_SCHOOLBAG_VOCAB = [
+  { id: 1, hanzi: "红色", pinyin: "hóngsè", meaning: "red" },
+  { id: 2, hanzi: "黄色", pinyin: "huángsè", meaning: "yellow" },
+  { id: 3, hanzi: "绿色", pinyin: "lǜsè", meaning: "green" },
+  { id: 4, hanzi: "只", pinyin: "zhī", meaning: "measure word (animals)" },
+  { id: 5, hanzi: "名字", pinyin: "míngzi", meaning: "name" },
+  { id: 6, hanzi: "漂亮", pinyin: "piàoliang", meaning: "beautiful" },
+  { id: 7, hanzi: "颜色", pinyin: "yánsè", meaning: "color" },
+  { id: 8, hanzi: "两", pinyin: "liǎng", meaning: "two" },
+  { id: 9, hanzi: "本", pinyin: "běn", meaning: "measure word (books)" },
+];
+
+// Lesson 5 — 你会不会做饭？(Can you cook?)
+const YCT2_L5_COOK_VOCAB = [
+  { id: 1, hanzi: "包子", pinyin: "bāozi", meaning: "baozi" },
+  { id: 2, hanzi: "医生", pinyin: "yīshēng", meaning: "doctor" },
+  { id: 3, hanzi: "厨师", pinyin: "chúshī", meaning: "chef, cook" },
+  { id: 4, hanzi: "会", pinyin: "huì", meaning: "can" },
+  { id: 5, hanzi: "做", pinyin: "zuò", meaning: "to do" },
+  { id: 6, hanzi: "真", pinyin: "zhēn", meaning: "really" },
+  { id: 7, hanzi: "好吃", pinyin: "hǎochī", meaning: "delicious" },
+];
+
+// Lesson 6 — 包子多少钱一个？(How much is one baozi?)
+const YCT2_L6_BAOZI_VOCAB = [
+  { id: 1, hanzi: "钱", pinyin: "qián", meaning: "money" },
+  { id: 2, hanzi: "茶", pinyin: "chá", meaning: "tea" },
+  { id: 3, hanzi: "买", pinyin: "mǎi", meaning: "to buy" },
+  { id: 4, hanzi: "多少", pinyin: "duōshao", meaning: "how much" },
+  { id: 5, hanzi: "块", pinyin: "kuài", meaning: "kuai (currency unit)" },
+  { id: 6, hanzi: "杯", pinyin: "bēi", meaning: "cup" },
+  { id: 7, hanzi: "太贵了", pinyin: "tài guì le", meaning: "too expensive" },
+];
+
+// Lesson 7 — 今天比昨天热。(Today is hotter than yesterday.)
+const YCT2_L7_WEATHER_VOCAB = [
+  { id: 1, hanzi: "冷", pinyin: "lěng", meaning: "cold" },
+  { id: 2, hanzi: "热", pinyin: "rè", meaning: "hot" },
+  { id: 3, hanzi: "天气", pinyin: "tiānqì", meaning: "weather" },
+  { id: 4, hanzi: "怎么样", pinyin: "zěnmeyàng", meaning: "how (is it)" },
+  { id: 5, hanzi: "比", pinyin: "bǐ", meaning: "than (comparison)" },
+  { id: 6, hanzi: "昨天", pinyin: "zuótiān", meaning: "yesterday" },
+  { id: 7, hanzi: "觉得", pinyin: "juéde", meaning: "to feel, to think" },
+  { id: 8, hanzi: "好喝", pinyin: "hǎohē", meaning: "tasty (to drink)" },
+  { id: 9, hanzi: "北京", pinyin: "Běijīng", meaning: "Beijing" },
+  { id: 10, hanzi: "纽约", pinyin: "Niǔyuē", meaning: "New York" },
+  { id: 11, hanzi: "冰水", pinyin: "bīng shuǐ", meaning: "ice water" },
+];
+
+// Lesson 8 — 马丁比我大三岁。(Martin is three years older than me.)
+const YCT2_L8_AGE_VOCAB = [
+  { id: 1, hanzi: "弟弟", pinyin: "dìdi", meaning: "little brother" },
+  { id: 2, hanzi: "妹妹", pinyin: "mèimei", meaning: "little sister" },
+  { id: 3, hanzi: "朋友", pinyin: "péngyou", meaning: "friend" },
+  { id: 4, hanzi: "同学", pinyin: "tóngxué", meaning: "classmate" },
+  { id: 5, hanzi: "也", pinyin: "yě", meaning: "also, too" },
+  { id: 6, hanzi: "学生", pinyin: "xuésheng", meaning: "student" },
+];
+
+// Lesson 9 — 你今天做什么了？(What did you do today?)
+const YCT2_L9_TODAY_VOCAB = [
+  { id: 1, hanzi: "香蕉", pinyin: "xiāngjiāo", meaning: "banana" },
+  { id: 2, hanzi: "熊猫", pinyin: "xióngmāo", meaning: "panda" },
+  { id: 3, hanzi: "水果", pinyin: "shuǐguǒ", meaning: "fruit" },
+  { id: 4, hanzi: "了", pinyin: "le", meaning: "did (particle)" },
+  { id: 5, hanzi: "画", pinyin: "huà", meaning: "to draw" },
+  { id: 6, hanzi: "没有", pinyin: "méiyǒu", meaning: "didn't, haven't" },
+];
+
+// Lesson 10 — 你怎么了？(What's wrong with you?)
+const YCT2_L10_SICK_VOCAB = [
+  { id: 1, hanzi: "脚", pinyin: "jiǎo", meaning: "foot" },
+  { id: 2, hanzi: "医院", pinyin: "yīyuàn", meaning: "hospital" },
+  { id: 3, hanzi: "怎么了", pinyin: "zěnme le", meaning: "what's wrong" },
+  { id: 4, hanzi: "疼", pinyin: "téng", meaning: "painful" },
+  { id: 5, hanzi: "现在", pinyin: "xiànzài", meaning: "now" },
+];
+
+// Lesson 11 — 我来北京一年了。(I've been in Beijing for one year.)
+// NOTE: source page 53 (this lesson's official "Let's learn" box) is
+// missing from the scanned PDF (confirmed: the page range jumps 52->54).
+// This list was reconstructed from surrounding pages (Let's read, Test,
+// the lesson title) rather than transcribed directly from the vocab box —
+// worth double-checking against another copy of the book.
+const YCT2_L11_BEIJING_VOCAB = [
+  { id: 1, hanzi: "点", pinyin: "diǎn", meaning: "o'clock" },
+  { id: 2, hanzi: "分钟", pinyin: "fēnzhōng", meaning: "minute" },
+  { id: 3, hanzi: "玩", pinyin: "wán", meaning: "to play" },
+  { id: 4, hanzi: "可以", pinyin: "kěyǐ", meaning: "may, can" },
+  { id: 5, hanzi: "年", pinyin: "nián", meaning: "year" },
+  { id: 6, hanzi: "现在", pinyin: "xiànzài", meaning: "now" },
+];
+
+// Lesson 12 — 复习 (Review): a mixed set spanning YCT 2 Lessons 1–11.
+const YCT2_L12_REVIEW_VOCAB = [
+  { id: 1, hanzi: "谢谢", pinyin: "xièxie", meaning: "thank you" },
+  { id: 2, hanzi: "起床", pinyin: "qǐchuáng", meaning: "get up" },
+  { id: 3, hanzi: "铅笔", pinyin: "qiānbǐ", meaning: "pencil" },
+  { id: 4, hanzi: "颜色", pinyin: "yánsè", meaning: "color" },
+  { id: 5, hanzi: "厨师", pinyin: "chúshī", meaning: "chef" },
+  { id: 6, hanzi: "钱", pinyin: "qián", meaning: "money" },
+  { id: 7, hanzi: "热", pinyin: "rè", meaning: "hot" },
+  { id: 8, hanzi: "弟弟", pinyin: "dìdi", meaning: "little brother" },
+  { id: 9, hanzi: "熊猫", pinyin: "xióngmāo", meaning: "panda" },
+  { id: 10, hanzi: "疼", pinyin: "téng", meaning: "painful" },
+  { id: 11, hanzi: "可以", pinyin: "kěyǐ", meaning: "may, can" },
+];
+
+// ------------------------------------------------------------
+// YCT 3 Standard Course — Level 3. Same "Let's learn" extraction as YCT 1/2.
+// ------------------------------------------------------------
+
+// Lesson 1 — 我三年级。(I'm in the third grade.)
+const YCT3_L1_GRADE_VOCAB = [
+  { id: 1, hanzi: "年级", pinyin: "niánjí", meaning: "grade" },
+  { id: 2, hanzi: "课", pinyin: "kè", meaning: "class, lesson" },
+  { id: 3, hanzi: "都", pinyin: "dōu", meaning: "both, all" },
+  { id: 4, hanzi: "班", pinyin: "bān", meaning: "class (group)" },
+  { id: 5, hanzi: "张", pinyin: "Zhāng", meaning: "Zhang (surname)" },
+  { id: 6, hanzi: "还", pinyin: "hái", meaning: "also, too" },
+  { id: 7, hanzi: "新", pinyin: "xīn", meaning: "new" },
+];
+
+// Lesson 2 — 你喜欢什么运动？(What's your favorite sport?)
+const YCT3_L2_SPORT_VOCAB = [
+  { id: 1, hanzi: "游泳", pinyin: "yóuyǒng", meaning: "swim" },
+  { id: 2, hanzi: "打篮球", pinyin: "dǎ lánqiú", meaning: "play basketball" },
+  { id: 3, hanzi: "踢足球", pinyin: "tī zúqiú", meaning: "play soccer" },
+  { id: 4, hanzi: "运动", pinyin: "yùndòng", meaning: "sport" },
+  { id: 5, hanzi: "太", pinyin: "tài", meaning: "too, extremely" },
+  { id: 6, hanzi: "每", pinyin: "měi", meaning: "every, each" },
+  { id: 7, hanzi: "一起", pinyin: "yìqǐ", meaning: "together" },
+  { id: 8, hanzi: "欢迎", pinyin: "huānyíng", meaning: "to welcome" },
+];
+
+// Lesson 3 — 我在画画儿呢。(I'm drawing a picture.)
+const YCT3_L3_DRAWING_VOCAB = [
+  { id: 1, hanzi: "太阳", pinyin: "tàiyáng", meaning: "sun" },
+  { id: 2, hanzi: "月亮", pinyin: "yuèliang", meaning: "moon" },
+  { id: 3, hanzi: "跑步", pinyin: "pǎobù", meaning: "run, jog" },
+  { id: 4, hanzi: "爷爷", pinyin: "yéye", meaning: "grandfather" },
+  { id: 5, hanzi: "奶奶", pinyin: "nǎinai", meaning: "grandmother" },
+  { id: 6, hanzi: "唱歌", pinyin: "chànggē", meaning: "sing" },
+  { id: 7, hanzi: "跳舞", pinyin: "tiàowǔ", meaning: "dance" },
+  { id: 8, hanzi: "让", pinyin: "ràng", meaning: "to let, to allow" },
+];
+
+// Lesson 4 — 喂，您好！(Hello!)
+const YCT3_L4_HELLO_VOCAB = [
+  { id: 1, hanzi: "喂", pinyin: "wèi", meaning: "hello (on the telephone)" },
+  { id: 2, hanzi: "您", pinyin: "nín", meaning: "you (polite)" },
+  { id: 3, hanzi: "找", pinyin: "zhǎo", meaning: "to look for" },
+  { id: 4, hanzi: "回", pinyin: "huí", meaning: "to return, to go back" },
+  { id: 5, hanzi: "问题", pinyin: "wèntí", meaning: "question" },
+  { id: 6, hanzi: "问", pinyin: "wèn", meaning: "to ask" },
+];
+
+// Lesson 5 — 再吃几个。(Have some more.)
+const YCT3_L5_MORE_VOCAB = [
+  { id: 1, hanzi: "面条儿", pinyin: "miàntiáor", meaning: "noodles" },
+  { id: 2, hanzi: "饺子", pinyin: "jiǎozi", meaning: "Chinese dumplings" },
+  { id: 3, hanzi: "饿", pinyin: "è", meaning: "hungry" },
+  { id: 4, hanzi: "想", pinyin: "xiǎng", meaning: "to think, to want to" },
+  { id: 5, hanzi: "最", pinyin: "zuì", meaning: "best" },
+  { id: 6, hanzi: "给", pinyin: "gěi", meaning: "to give" },
+  { id: 7, hanzi: "再", pinyin: "zài", meaning: "again" },
+  { id: 8, hanzi: "饱", pinyin: "bǎo", meaning: "full (after eating)" },
+];
+
+// Lesson 6 — 我能自己穿。(I can put it on by myself.)
+const YCT3_L6_DRESS_VOCAB = [
+  { id: 1, hanzi: "衣服", pinyin: "yīfu", meaning: "clothes" },
+  { id: 2, hanzi: "鞋", pinyin: "xié", meaning: "shoes" },
+  { id: 3, hanzi: "帮助", pinyin: "bāngzhù", meaning: "to help" },
+  { id: 4, hanzi: "穿", pinyin: "chuān", meaning: "to wear, to put on" },
+  { id: 5, hanzi: "能", pinyin: "néng", meaning: "can" },
+  { id: 6, hanzi: "自己", pinyin: "zìjǐ", meaning: "oneself" },
+];
+
+// Lesson 7 — 生日快乐！(Happy birthday!)
+const YCT3_L7_BIRTHDAY_VOCAB = [
+  { id: 1, hanzi: "礼物", pinyin: "lǐwù", meaning: "gift, present" },
+  { id: 2, hanzi: "花", pinyin: "huā", meaning: "flower" },
+  { id: 3, hanzi: "蛋糕", pinyin: "dàngāo", meaning: "cake" },
+  { id: 4, hanzi: "生日", pinyin: "shēngrì", meaning: "birthday" },
+  { id: 5, hanzi: "送", pinyin: "sòng", meaning: "to give (a gift)" },
+  { id: 6, hanzi: "给", pinyin: "gěi", meaning: "for, to" },
+  { id: 7, hanzi: "吧", pinyin: "ba", meaning: "mild suggestion particle" },
+  { id: 8, hanzi: "但是", pinyin: "dànshì", meaning: "but, however" },
+  { id: 9, hanzi: "快乐", pinyin: "kuàilè", meaning: "happy" },
+];
+
+// Lesson 8 — 下雪了。(It's snowing.)
+const YCT3_L8_SNOW_VOCAB = [
+  { id: 1, hanzi: "下雪", pinyin: "xiàxuě", meaning: "to snow" },
+  { id: 2, hanzi: "听", pinyin: "tīng", meaning: "to listen" },
+  { id: 3, hanzi: "下雨", pinyin: "xiàyǔ", meaning: "to rain" },
+  { id: 4, hanzi: "外面", pinyin: "wàimian", meaning: "outside" },
+  { id: 5, hanzi: "出", pinyin: "chū", meaning: "to go/come out" },
+  { id: 6, hanzi: "别", pinyin: "bié", meaning: "don't" },
+  { id: 7, hanzi: "作业", pinyin: "zuòyè", meaning: "homework" },
+];
+
+// Lesson 9 — 笑一笑！(Smile!)
+const YCT3_L9_SMILE_VOCAB = [
+  { id: 1, hanzi: "哭", pinyin: "kū", meaning: "to cry" },
+  { id: 2, hanzi: "笑", pinyin: "xiào", meaning: "to smile" },
+  { id: 3, hanzi: "东西", pinyin: "dōngxi", meaning: "thing" },
+  { id: 4, hanzi: "丢", pinyin: "diū", meaning: "to lose" },
+  { id: 5, hanzi: "到", pinyin: "dào", meaning: "to reach (result)" },
+];
+
+// Lesson 10 — 谁跑得快？(Who runs fast?)
+const YCT3_L10_RUN_VOCAB = [
+  { id: 1, hanzi: "老虎", pinyin: "lǎohǔ", meaning: "tiger" },
+  { id: 2, hanzi: "第一", pinyin: "dì yī", meaning: "the first" },
+  { id: 3, hanzi: "胖", pinyin: "pàng", meaning: "fat" },
+  { id: 4, hanzi: "瘦", pinyin: "shòu", meaning: "thin, slim" },
+  { id: 5, hanzi: "些", pinyin: "xiē", meaning: "some" },
+  { id: 6, hanzi: "得", pinyin: "de", meaning: "structural particle" },
+  { id: 7, hanzi: "快", pinyin: "kuài", meaning: "fast" },
+  { id: 8, hanzi: "知道", pinyin: "zhīdào", meaning: "to know" },
+];
+
+// Lesson 11 — 妈妈把糖给弟弟了。(Mom has given the candy to your brother.)
+const YCT3_L11_GIVE_VOCAB = [
+  { id: 1, hanzi: "水果", pinyin: "shuǐguǒ", meaning: "fruit" },
+  { id: 2, hanzi: "糖", pinyin: "táng", meaning: "candy" },
+  { id: 3, hanzi: "西瓜", pinyin: "xīguā", meaning: "watermelon" },
+  { id: 4, hanzi: "鸡蛋", pinyin: "jīdàn", meaning: "egg" },
+  { id: 5, hanzi: "把", pinyin: "bǎ", meaning: "particle marking the object" },
+];
+
+// Lesson 12 — 复习 (Review): a mixed set spanning YCT 3 Lessons 1–11.
+const YCT3_L12_REVIEW_VOCAB = [
+  { id: 1, hanzi: "年级", pinyin: "niánjí", meaning: "grade" },
+  { id: 2, hanzi: "都", pinyin: "dōu", meaning: "both, all" },
+  { id: 3, hanzi: "游泳", pinyin: "yóuyǒng", meaning: "swim" },
+  { id: 4, hanzi: "太阳", pinyin: "tàiyáng", meaning: "sun" },
+  { id: 5, hanzi: "喂", pinyin: "wèi", meaning: "hello (on the phone)" },
+  { id: 6, hanzi: "饺子", pinyin: "jiǎozi", meaning: "dumplings" },
+  { id: 7, hanzi: "衣服", pinyin: "yīfu", meaning: "clothes" },
+  { id: 8, hanzi: "蛋糕", pinyin: "dàngāo", meaning: "cake" },
+  { id: 9, hanzi: "下雪", pinyin: "xiàxuě", meaning: "to snow" },
+  { id: 10, hanzi: "笑", pinyin: "xiào", meaning: "to smile" },
+  { id: 11, hanzi: "老虎", pinyin: "lǎohǔ", meaning: "tiger" },
+  { id: 12, hanzi: "西瓜", pinyin: "xīguā", meaning: "watermelon" },
+];
+
 function standardChallenges() {
   return [
     { id: "flashcards", title: "🗂️ Flashcards", desc: "Learn each word", type: "flashcards" },
@@ -265,19 +556,133 @@ const CURRICULUM = [
     ],
   },
   {
-    id: "level2", title: "Level 2", subtitle: "Elementary",
+    id: "level2", title: "Level 2", subtitle: "YCT 2 · Elementary",
     units: [
-      { id: "unit1", title: "Unit 1", theme: "Animals (动物)", available: false, vocab: [], challenges: [] },
-      { id: "unit2", title: "Unit 2", theme: "Food (食物)", available: false, vocab: [], challenges: [] },
-      { id: "unit3", title: "Unit 3", theme: "School (学校)", available: false, vocab: [], challenges: [] },
+      {
+        id: "unit1", title: "Lesson 1", theme: "我可以坐这儿吗？May I sit here?", available: true,
+        vocab: YCT2_L1_SIT_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit2", title: "Lesson 2", theme: "你早上几点起床？Morning routine", available: true,
+        vocab: YCT2_L2_MORNING_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit3", title: "Lesson 3", theme: "你的铅笔呢？Where is your pencil?", available: true,
+        vocab: YCT2_L3_PENCIL_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit4", title: "Lesson 4", theme: "书包里有两本书 In the schoolbag", available: true,
+        vocab: YCT2_L4_SCHOOLBAG_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit5", title: "Lesson 5", theme: "你会不会做饭？Can you cook?", available: true,
+        vocab: YCT2_L5_COOK_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit6", title: "Lesson 6", theme: "包子多少钱一个？How much is it?", available: true,
+        vocab: YCT2_L6_BAOZI_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit7", title: "Lesson 7", theme: "今天比昨天热 Weather & comparing", available: true,
+        vocab: YCT2_L7_WEATHER_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit8", title: "Lesson 8", theme: "马丁比我大三岁 Comparing ages", available: true,
+        vocab: YCT2_L8_AGE_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit9", title: "Lesson 9", theme: "你今天做什么了？What did you do today?", available: true,
+        vocab: YCT2_L9_TODAY_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit10", title: "Lesson 10", theme: "你怎么了？What's wrong?", available: true,
+        vocab: YCT2_L10_SICK_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit11", title: "Lesson 11", theme: "我来北京一年了 A year in Beijing", available: true,
+        vocab: YCT2_L11_BEIJING_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit12", title: "Lesson 12", theme: "复习 Review", available: true,
+        vocab: YCT2_L12_REVIEW_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
     ],
   },
   {
-    id: "level3", title: "Level 3", subtitle: "Intermediate",
+    id: "level3", title: "Level 3", subtitle: "YCT 3 · Intermediate",
     units: [
-      { id: "unit1", title: "Unit 1", theme: "Weather (天气)", available: false, vocab: [], challenges: [] },
-      { id: "unit2", title: "Unit 2", theme: "Time (时间)", available: false, vocab: [], challenges: [] },
-      { id: "unit3", title: "Unit 3", theme: "Hobbies (爱好)", available: false, vocab: [], challenges: [] },
+      {
+        id: "unit1", title: "Lesson 1", theme: "我三年级 Grade & school", available: true,
+        vocab: YCT3_L1_GRADE_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit2", title: "Lesson 2", theme: "你喜欢什么运动？Sports", available: true,
+        vocab: YCT3_L2_SPORT_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit3", title: "Lesson 3", theme: "我在画画儿呢 Drawing & family", available: true,
+        vocab: YCT3_L3_DRAWING_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit4", title: "Lesson 4", theme: "喂，您好！On the phone", available: true,
+        vocab: YCT3_L4_HELLO_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit5", title: "Lesson 5", theme: "再吃几个 Have some more", available: true,
+        vocab: YCT3_L5_MORE_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit6", title: "Lesson 6", theme: "我能自己穿 Getting dressed", available: true,
+        vocab: YCT3_L6_DRESS_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit7", title: "Lesson 7", theme: "生日快乐！Birthday", available: true,
+        vocab: YCT3_L7_BIRTHDAY_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit8", title: "Lesson 8", theme: "下雪了 Weather & seasons", available: true,
+        vocab: YCT3_L8_SNOW_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit9", title: "Lesson 9", theme: "笑一笑！Feelings", available: true,
+        vocab: YCT3_L9_SMILE_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit10", title: "Lesson 10", theme: "谁跑得快？Racing & describing", available: true,
+        vocab: YCT3_L10_RUN_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit11", title: "Lesson 11", theme: "妈妈把糖给弟弟了 Fruit & sweets", available: true,
+        vocab: YCT3_L11_GIVE_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit12", title: "Lesson 12", theme: "复习 Review", available: true,
+        vocab: YCT3_L12_REVIEW_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
     ],
   },
 ];

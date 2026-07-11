@@ -13,13 +13,14 @@ fullscreen, indistinguishable from a native app to students).
 ## Structure
 
 - **Levels** (1, 2, 3) → **Units** (themed vocab sets) → **Challenges**.
-  Level 1 is built from the **YCT 1 Standard Course** textbook. Every Level 1
-  unit runs the full **four-skills** flow: a **Flashcards** Learn step, then
-  graded **Listening** (hear it → tap the character), **Speaking** (hold to
-  read each word aloud, checked by speech recognition), **Reading** (see the
+  Level 1 is built from **YCT 1**, Level 2 from **YCT 2**, and Level 3 from
+  **YCT 3** (all Confucius Institute HQ/Hanban Standard Course textbooks) —
+  12 lessons each, 36 units total, every one fully open. Every unit runs the
+  full **four-skills** flow: a **Flashcards** Learn step, then graded
+  **Listening** (hear it → tap the character), **Speaking** (hold to read
+  each word aloud, checked by speech recognition), **Reading** (see the
   character → tap the meaning), and **Writing** (trace each character
-  stroke-by-stroke, validated by the HanziWriter library). Levels 2–3 are
-  placeholders showing where future content goes.
+  stroke-by-stroke, validated by the HanziWriter library).
 - Each correct answer is worth **1 point**, so a challenge's max equals its
   number of questions. Flashcards is a Learn step and isn't scored. A
   persistent top banner shows the student's running total, and re-completing a
@@ -44,20 +45,30 @@ fullscreen, indistinguishable from a native app to students).
   across every daily play, since the goal is to reward showing up, not to
   cap a single high score.
 
-### Curriculum status — Level 1 covers all 12 YCT lessons
+### Curriculum status — Levels 1–3 cover all 36 YCT 1–3 lessons
 
-YCT Book 1 has **12 lessons** (Lessons 1–11 + Lesson 12 Review), and
-**Level 1's `CURRICULUM` entry now has all 12 as units** (`unit1`–`unit12`),
-each pointing at its lesson's vocab array (`L1_GREETINGS_VOCAB` through
-`L12_REVIEW_VOCAB`, all defined in `public/student.js`) and using
-`fourSkillChallenges()`. Verified locally that all 12 units render with 5
-challenges each.
+Each YCT book (1, 2, 3) has **12 lessons** (11 + a Lesson 12 Review), and
+each level's `CURRICULUM` entry has all 12 as units (`unit1`–`unit12`), every
+one `available: true` and using `fourSkillChallenges()`. Vocab arrays are
+named `L{n}_..._VOCAB` for Level 1 (YCT 1), `YCT2_L{n}_..._VOCAB` for Level 2
+(YCT 2), and `YCT3_L{n}_..._VOCAB` for Level 3 (YCT 3), all in
+`public/student.js`. Every Lesson 12 is a hand-picked review set spanning
+that book's Lessons 1–11 (review lessons in the textbook itself don't
+introduce new vocab). Verified locally that all 36 units render with 5
+challenges each and at least 4 vocab items (the minimum for a 4-option
+Listening/Reading question) — several lessons sit right at that minimum
+(YCT 1 Lesson 5, YCT 2 Lesson 10, YCT 3 Lessons 9 and 11 all have exactly
+4–5 items), so double-check those if their vocab arrays ever get edited.
 
-Note: Lesson 5 has only 4 vocab items and Lesson 10 only 5 — both are above
-the 4-item minimum needed for Listening/Reading's 4-option questions, but
-there's no margin, so double-check those two lessons if their vocab arrays
-ever get edited. The source PDFs are under the YCT folder in Google Drive
-(see the `yct-curriculum-source` project memory for the exact path).
+Known data gap: **YCT 2 Lesson 11**'s source page (p.53 of the scanned PDF)
+is missing from the scan — the page range jumps straight from 52 to 54. Its
+vocab array (`YCT2_L11_BEIJING_VOCAB`) was reconstructed from surrounding
+pages (the "Let's read" dialogue, the Test section, and the lesson title)
+rather than transcribed from the official "Let's learn" vocab box, so it's
+a best-effort guess worth double-checking against another copy of the book.
+
+The source PDFs are under the YCT folder in Google Drive (see the
+`yct-curriculum-source` project memory for the exact path).
 - Sign-in is Google SSO restricted to `@neoacademy.id` accounts. Signing in
   with an email on the `TEACHER_EMAILS` allowlist (see below) opens the
   dashboard; every other `@neoacademy.id` account opens the student app.
@@ -176,8 +187,10 @@ ever need to rotate them).
 
 ## Known limitations (it's a prototype)
 
-- Level 1 now covers all 12 YCT 1 lessons (see "Curriculum status" above).
-  Levels 2–3 are placeholders.
+- Levels 1–3 now cover all 36 YCT 1–3 lessons (see "Curriculum status"
+  above), including one lesson (YCT 2 Lesson 11) reconstructed from a
+  missing source page — worth double-checking against another copy of the
+  textbook.
 - Audio uses the iPad's built-in Mandarin text-to-speech (Safari supports
   `zh-CN` voices natively) rather than recorded native-speaker audio.
 - The local (`server.js`) version has no login and separate in-memory
