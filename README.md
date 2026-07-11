@@ -29,43 +29,20 @@ fullscreen, indistinguishable from a native app to students).
   writing a new vocab array and flipping `available: true` in the
   `CURRICULUM` object.
 
-### Curriculum status — WORK IN PROGRESS (Level 1 → all 12 YCT lessons)
+### Curriculum status — Level 1 covers all 12 YCT lessons
 
-YCT Book 1 has **12 lessons** (Lessons 1–11 + Lesson 12 Review), and the goal
-is for **Level 1 to contain all 12** as units. Current state:
+YCT Book 1 has **12 lessons** (Lessons 1–11 + Lesson 12 Review), and
+**Level 1's `CURRICULUM` entry now has all 12 as units** (`unit1`–`unit12`),
+each pointing at its lesson's vocab array (`L1_GREETINGS_VOCAB` through
+`L12_REVIEW_VOCAB`, all defined in `public/student.js`) and using
+`fourSkillChallenges()`. Verified locally that all 12 units render with 5
+challenges each.
 
-- **Wired up and live: Lessons 1–4 only.** The `CURRICULUM` object's `level1`
-  entry has four units (`unit1`–`unit4`) pointing at `L1_GREETINGS_VOCAB`,
-  `L2_NAME_VOCAB`, `L3_WHOIS_VOCAB`, `L4_FAMILY_VOCAB`, each using
-  `fourSkillChallenges()`.
-- **Vocab already extracted but NOT yet wired up: Lessons 5–12.** The arrays
-  `L5_AGE_VOCAB`, `L6_BODY_VOCAB`, `L7_ANIMALS_VOCAB`, `L8_PLACES_VOCAB`,
-  `L9_TIME_VOCAB`, `L10_CLOCK_VOCAB`, `L11_FOOD_VOCAB`, and `L12_REVIEW_VOCAB`
-  are already defined in `public/student.js` (pulled from the YCT 1 PDF), but
-  they are **not referenced by `CURRICULUM` yet** — so the app still shows only
-  4 lessons.
-
-**To finish (next session):** add eight more unit entries (`unit5`–`unit12`)
-to the `level1.units` array in `CURRICULUM`, one per array above, each with
-`available: true` and `challenges: fourSkillChallenges()`. Suggested
-title/theme per lesson:
-
-| unit | title | theme |
-|------|-------|-------|
-| unit5 | Lesson 5 | 我6岁 Age |
-| unit6 | Lesson 6 | 你的个子真高！Body & describing |
-| unit7 | Lesson 7 | 这是谁的狗？Animals |
-| unit8 | Lesson 8 | 我去商店 Places & going |
-| unit9 | Lesson 9 | 今天星期几？Days & dates |
-| unit10 | Lesson 10 | 现在几点？Time |
-| unit11 | Lesson 11 | 你吃什么？Food & drink |
-| unit12 | Lesson 12 | 复习 Review |
-
-After wiring, verify all 12 units render 5 challenges each and that
-Listening/Reading build valid 4-option questions (needs ≥4 vocab items —
-Lesson 5 has only 4 and Lesson 10 only 5, which is exactly the minimum, so
-double-check those two). The source PDFs are under the YCT folder in Google
-Drive (see the `yct-curriculum-source` project memory for the exact path).
+Note: Lesson 5 has only 4 vocab items and Lesson 10 only 5 — both are above
+the 4-item minimum needed for Listening/Reading's 4-option questions, but
+there's no margin, so double-check those two lessons if their vocab arrays
+ever get edited. The source PDFs are under the YCT folder in Google Drive
+(see the `yct-curriculum-source` project memory for the exact path).
 - Sign-in is Google SSO restricted to `@neoacademy.id` accounts. Signing in
   with an email on the `TEACHER_EMAILS` allowlist (see below) opens the
   dashboard; every other `@neoacademy.id` account opens the student app.
@@ -184,9 +161,8 @@ ever need to rotate them).
 
 ## Known limitations (it's a prototype)
 
-- Level 1 currently exposes YCT 1 Lessons **1–4**; Lessons 5–12 have their
-  vocab extracted but aren't wired into `CURRICULUM` yet (see "Curriculum
-  status" above). Levels 2–3 are placeholders.
+- Level 1 now covers all 12 YCT 1 lessons (see "Curriculum status" above).
+  Levels 2–3 are placeholders.
 - Audio uses the iPad's built-in Mandarin text-to-speech (Safari supports
   `zh-CN` voices natively) rather than recorded native-speaker audio.
 - The local (`server.js`) version has no login and separate in-memory

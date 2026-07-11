@@ -222,6 +222,46 @@ const CURRICULUM = [
         vocab: L4_FAMILY_VOCAB,
         challenges: fourSkillChallenges(),
       },
+      {
+        id: "unit5", title: "Lesson 5", theme: "我6岁 Age", available: true,
+        vocab: L5_AGE_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit6", title: "Lesson 6", theme: "你的个子真高！Body & describing", available: true,
+        vocab: L6_BODY_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit7", title: "Lesson 7", theme: "这是谁的狗？Animals", available: true,
+        vocab: L7_ANIMALS_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit8", title: "Lesson 8", theme: "我去商店 Places & going", available: true,
+        vocab: L8_PLACES_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit9", title: "Lesson 9", theme: "今天星期几？Days & dates", available: true,
+        vocab: L9_TIME_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit10", title: "Lesson 10", theme: "现在几点？Time", available: true,
+        vocab: L10_CLOCK_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit11", title: "Lesson 11", theme: "你吃什么？Food & drink", available: true,
+        vocab: L11_FOOD_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
+      {
+        id: "unit12", title: "Lesson 12", theme: "复习 Review", available: true,
+        vocab: L12_REVIEW_VOCAB,
+        challenges: fourSkillChallenges(),
+      },
     ],
   },
   {
