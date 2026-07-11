@@ -158,6 +158,64 @@ function $(id) { return document.getElementById(id); }
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
   $(id).classList.add("active");
+  updateBreadcrumb(id);
+}
+
+// ============================================================
+// Breadcrumb: a tappable "Levels › Level › Lesson › Game" path at the
+// bottom, so students can jump back any number of steps at once instead
+// of tapping Back repeatedly. How deep the path goes is driven purely by
+// which screen is active.
+// ============================================================
+const SCREEN_DEPTH = {
+  "screen-home": 0,
+  "screen-level": 1,
+  "screen-unit": 2,
+  "screen-flashcards": 3,
+  "screen-match": 3,
+  "screen-quiz": 3,
+  "screen-challenge-done": 3,
+};
+
+function goHome() {
+  renderLevels();
+  showScreen("screen-home");
+  postLocation("Home");
+}
+
+function updateBreadcrumb(activeId) {
+  const bar = $("breadcrumb");
+  const depth = SCREEN_DEPTH[activeId];
+  if (depth === undefined) { bar.classList.remove("visible"); return; }
+
+  const items = [{ icon: "🏠", label: "Levels", go: goHome }];
+  if (depth >= 1 && currentLevel) {
+    items.push({ icon: "📂", label: currentLevel.title, go: () => openLevel(currentLevel) });
+  }
+  if (depth >= 2 && currentUnit) {
+    items.push({ icon: "📖", label: currentUnit.title, go: () => openUnit(currentLevel, currentUnit) });
+  }
+  if (depth >= 3 && currentChallenge) {
+    // challenge titles already carry their own emoji, so no extra icon
+    items.push({ label: currentChallenge.title, go: () => startChallenge(currentLevel, currentUnit, currentChallenge) });
+  }
+
+  bar.innerHTML = "";
+  items.forEach((item, i) => {
+    if (i > 0) {
+      const sep = document.createElement("span");
+      sep.className = "crumb-sep";
+      sep.textContent = "›";
+      bar.appendChild(sep);
+    }
+    const isCurrent = i === items.length - 1;
+    const btn = document.createElement("button");
+    btn.className = "crumb" + (isCurrent ? " current" : "");
+    btn.textContent = (item.icon ? item.icon + " " : "") + item.label;
+    if (!isCurrent) btn.addEventListener("click", item.go);
+    bar.appendChild(btn);
+  });
+  bar.classList.add("visible");
 }
 
 function shuffle(arr) {
@@ -217,11 +275,7 @@ function updateHeader() {
   $("header-points").textContent = `⭐ ${studentRecord.totalPoints} pts`;
 }
 
-$("home-btn").addEventListener("click", () => {
-  renderLevels();
-  showScreen("screen-home");
-  postLocation("Home");
-});
+$("home-btn").addEventListener("click", goHome);
 
 $("logout-btn").addEventListener("click", async () => {
   if (PREVIEW) { window.location.href = "/index.html"; return; }
@@ -318,11 +372,7 @@ function openLevel(level) {
   postLocation(`${level.title}`);
 }
 
-$("level-back-btn").addEventListener("click", () => {
-  renderLevels();
-  showScreen("screen-home");
-  postLocation("Home");
-});
+$("level-back-btn").addEventListener("click", goHome);
 
 // ============================================================
 // LEVEL: UNIT LIST

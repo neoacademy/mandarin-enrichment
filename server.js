@@ -5,7 +5,13 @@ const os = require('os');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// no-store so this local testing server always serves the latest edits —
+// otherwise browsers cache student.js/style.css and you see stale UI.
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: false,
+  lastModified: false,
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-store'),
+}));
 
 const ROSTER_PATH = path.join(__dirname, 'roster.json');
 
