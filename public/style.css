@@ -311,6 +311,11 @@ body.preview-mode::after {
 .minigame-card.ready .mg-card-sub { color: #6b4e00; font-weight: 600; }
 .minigame-card.ready:active { transform: scale(0.98); }
 
+/* Test-only replay button — see the comment in student.html; only ever
+   shown in the preview sandbox, never for a real signed-in account. */
+.mg-test-btn { display: none; }
+body.preview-mode .mg-test-btn { display: inline-block; margin-top: -6px; margin-bottom: 8px; }
+
 /* Daily Challenge: intro screen */
 .mg-intro-card {
   background: white;

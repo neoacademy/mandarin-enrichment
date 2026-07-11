@@ -655,6 +655,16 @@ function miniGameVocabPool() {
       if (isUnitComplete(level, unit)) pool.push(...unit.vocab);
     });
   });
+  if (pool.length) return pool;
+
+  // Fallback for the preview "test" button, which can open the game before
+  // any unit is actually complete — draw from any available unit instead of
+  // leaving the pool empty.
+  CURRICULUM.forEach((level) => {
+    level.units.forEach((unit) => {
+      if (unit.available) pool.push(...unit.vocab);
+    });
+  });
   return pool;
 }
 
@@ -836,6 +846,15 @@ function finishMiniGame() {
 $("mg-start-btn").addEventListener("click", startMiniGame);
 $("mg-intro-back-btn").addEventListener("click", goHome);
 $("mg-done-continue").addEventListener("click", goHome);
+
+// Preview-only test entry point (button is CSS-hidden outside preview mode):
+// skips the unit-completion + cooldown gate entirely so the mini-game can be
+// replayed on demand while testing. Safe to bypass here because PREVIEW mode
+// never persists anything to the server either way.
+$("mg-test-btn").addEventListener("click", () => {
+  showScreen("screen-minigame-intro");
+  postLocation("Daily Challenge (test)");
+});
 
 // ============================================================
 // UNIT: CHALLENGE LIST

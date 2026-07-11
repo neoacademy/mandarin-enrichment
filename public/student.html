@@ -32,6 +32,11 @@
   <h1>Levels</h1>
   <p class="subtitle">Pick a level to see its units</p>
   <div class="minigame-card" id="minigame-card"></div>
+  <!-- Only ever shown in preview mode (?preview=1) — see student.js. Bypasses
+       the unit-completion lock and the 24h cooldown so the mini-game can be
+       replayed endlessly while testing; preview never writes to the server
+       anyway, so there's no real progress at risk. -->
+  <button class="ghost mg-test-btn" id="mg-test-btn">🧪 Test Daily Challenge (preview only)</button>
   <div class="card-list" id="level-list"></div>
 </div>
 
