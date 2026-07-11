@@ -90,9 +90,38 @@
   <div class="quiz-options" id="quiz-options"></div>
 </div>
 
+<!-- LISTENING: hear the word, tap the character -->
+<div id="screen-listening" class="screen">
+  <p class="subtitle">Listening <span id="listen-progress"></span></p>
+  <p class="quiz-question">Which character did you hear?</p>
+  <button class="speak-btn" id="listen-replay">🔊 Play again</button>
+  <div class="quiz-options" id="listen-options"></div>
+</div>
+
+<!-- READING: see the character, tap the meaning -->
+<div id="screen-reading" class="screen">
+  <p class="subtitle">Reading <span id="reading-progress"></span></p>
+  <p class="quiz-question">What does this mean?</p>
+  <div class="card"><p class="hanzi" id="reading-hanzi">你</p></div>
+  <div class="quiz-options" id="reading-options"></div>
+</div>
+
+<!-- WRITING: trace each character -->
+<div id="screen-writing" class="screen">
+  <p class="subtitle" id="writing-progress">Writing</p>
+  <p class="subtitle">Trace each stroke in order ✍️</p>
+  <p class="pinyin" id="writing-pinyin">nǐ</p>
+  <p class="numeral" id="writing-meaning">you</p>
+  <div class="writing-targets" id="writing-targets"></div>
+  <p class="fc-read-feedback" id="writing-feedback"></p>
+  <div class="nav-row">
+    <button class="ghost" id="writing-skip">Skip</button>
+  </div>
+</div>
+
 <!-- CHALLENGE COMPLETE -->
 <div id="screen-challenge-done" class="screen">
-  <div class="points-earned-banner">
+  <div class="points-earned-banner" id="cd-points-banner">
     <div class="checkpoint-label">You earned</div>
     <div class="points-earned-value" id="cd-points">+10</div>
     <div class="checkpoint-label">points!</div>
@@ -104,6 +133,9 @@
 <!-- BREADCRUMB: tap any earlier step to jump back to it -->
 <nav class="breadcrumb" id="breadcrumb" aria-label="Navigation path"></nav>
 
+<!-- HanziWriter powers the Writing challenge's stroke-by-stroke tracing.
+     Loaded before student.js; the app degrades gracefully if it's blocked. -->
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3/dist/hanzi-writer.min.js"></script>
 <script src="student.js"></script>
 </body>
 </html>

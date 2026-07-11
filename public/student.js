@@ -78,9 +78,22 @@ const L4_FAMILY_VOCAB = [
 
 function standardChallenges() {
   return [
-    { id: "flashcards", title: "🗂️ Flashcards", desc: "Learn each word", points: 10, type: "flashcards" },
-    { id: "matching", title: "🔗 Matching Game", desc: "Match characters to pinyin", points: 15, type: "matching" },
-    { id: "quiz", title: "📝 Quiz", desc: "Test what you learned", points: 30, type: "quiz" },
+    { id: "flashcards", title: "🗂️ Flashcards", desc: "Learn each word", type: "flashcards" },
+    { id: "matching", title: "🔗 Matching Game", desc: "Match characters to pinyin", type: "matching" },
+    { id: "quiz", title: "📝 Quiz", desc: "Test what you learned", type: "quiz" },
+  ];
+}
+
+// The full "four skills" set: a Learn step (flashcards) followed by graded
+// Listening, Speaking, Reading and Writing tests. Used by Unit 1; other units
+// still use standardChallenges() until they're built out the same way.
+function fourSkillChallenges() {
+  return [
+    { id: "flashcards", title: "🗂️ Flashcards", desc: "Learn each word", type: "flashcards" },
+    { id: "listening", title: "👂 Listening", desc: "Hear it, tap the character", type: "listening" },
+    { id: "speaking", title: "🗣️ Speaking", desc: "Read each word aloud", type: "speaking" },
+    { id: "reading", title: "📖 Reading", desc: "Read it, tap the meaning", type: "reading" },
+    { id: "writing", title: "✍️ Writing", desc: "Trace each character", type: "writing" },
   ];
 }
 
@@ -91,7 +104,7 @@ const CURRICULUM = [
       {
         id: "unit1", title: "Lesson 1", theme: "你好！Hello! (greetings + 1–10)", available: true,
         vocab: L1_GREETINGS_VOCAB,
-        challenges: standardChallenges(),
+        challenges: fourSkillChallenges(),
       },
       {
         id: "unit2", title: "Lesson 2", theme: "你叫什么？What's your name?", available: true,
@@ -139,9 +152,14 @@ let currentUnit = null;
 let currentChallenge = null;
 
 let fcIndex = 0;
+let fcMode = "learn";
 let quizIndex = 0;
 let quizScore = 0;
 let quizQuestions = [];
+
+// Listening / Reading (multiple-choice) and Writing (stroke tracing) state.
+let mcqQuestions = [], mcqIndex = 0, mcqScore = 0;
+let writeWords = [], writeIndex = 0, writeDone = 0;
 let matchSelectedHanzi = null;
 let matchedCount = 0;
 
@@ -189,6 +207,9 @@ const SCREEN_DEPTH = {
   "screen-flashcards": 3,
   "screen-match": 3,
   "screen-quiz": 3,
+  "screen-listening": 3,
+  "screen-reading": 3,
+  "screen-writing": 3,
   "screen-challenge-done": 3,
 };
 
@@ -429,6 +450,21 @@ function openUnit(level, unit) {
   postLocation(`${level.title} > ${unit.title}`);
 }
 
+// Each correct answer is worth 1 point, so a challenge's max = its number of
+// items. Flashcards is the Learn step and isn't scored at all.
+function challengeMaxPoints(unit, challenge) {
+  const n = unit.vocab.length;
+  switch (challenge.type) {
+    case "listening":
+    case "reading":
+    case "quiz":
+    case "writing":
+      return Math.min(6, n);
+    default: // speaking, matching
+      return n;
+  }
+}
+
 function renderChallenges(level, unit) {
   const list = $("challenge-list");
   list.innerHTML = "";
@@ -436,18 +472,26 @@ function renderChallenges(level, unit) {
 
   unit.challenges.forEach((challenge) => {
     const key = challengeKey(level, unit, challenge);
+    const isLearn = challenge.type === "flashcards";
     const earned = studentRecord.completed[key];
-    if (!earned) allDone = false;
+    // Learn is "done" once visited (recorded, even as 0); scored challenges
+    // count as done once at least one point is earned.
+    const done = isLearn ? (key in studentRecord.completed) : !!earned;
+    if (!done) allDone = false;
+
+    const scoreLabel = isLearn
+      ? "Learn"
+      : `${earned || 0}/${challengeMaxPoints(unit, challenge)} pts`;
 
     const card = document.createElement("div");
-    card.className = "challenge-card" + (earned ? " done" : "");
+    card.className = "challenge-card" + (done ? " done" : "");
     card.innerHTML = `
       <div class="cc-text">
         <div class="cc-title">${challenge.title}</div>
         <div class="cc-desc">${challenge.desc}</div>
       </div>
-      <div class="cc-points">${earned ? earned : "0"}/${challenge.points} pts</div>
-      ${earned ? '<div class="cc-check">✅</div>' : ""}
+      <div class="cc-points">${scoreLabel}</div>
+      ${done ? '<div class="cc-check">✅</div>' : ""}
     `;
     card.addEventListener("click", () => startChallenge(level, unit, challenge));
     list.appendChild(card);
@@ -468,16 +512,21 @@ $("unit-back-btn").addEventListener("click", () => {
 function startChallenge(level, unit, challenge) {
   currentChallenge = challenge;
   postLocation(`${level.title} > ${unit.title} > ${challenge.title}`);
-  if (challenge.type === "flashcards") startFlashcards(unit);
+  if (challenge.type === "flashcards") startFlashcards(unit, "learn");
+  else if (challenge.type === "speaking") startFlashcards(unit, "speaking");
+  else if (challenge.type === "listening") startListening(unit);
+  else if (challenge.type === "reading") startReadingChallenge(unit);
+  else if (challenge.type === "writing") startWriting(unit);
   else if (challenge.type === "matching") startMatchGame(unit);
   else if (challenge.type === "quiz") startQuiz(unit);
 }
 
-function finishChallenge(points, message) {
+// learned=true records completion of the Learn step without showing/earning
+// points (the points banner is hidden).
+function finishChallenge(points, message, learned) {
   const key = challengeKey(currentLevel, currentUnit, currentChallenge);
   const prevBest = studentRecord.completed[key] || 0;
-  const newBest = Math.max(prevBest, points);
-  studentRecord.completed[key] = newBest;
+  studentRecord.completed[key] = Math.max(prevBest, points);
   studentRecord.totalPoints = Object.values(studentRecord.completed).reduce((a, b) => a + b, 0);
   updateHeader();
 
@@ -487,6 +536,8 @@ function finishChallenge(points, message) {
     location: `${currentLevel.title} > ${currentUnit.title} > ${currentChallenge.title}`,
   });
 
+  const banner = $("cd-points-banner");
+  if (banner) banner.style.display = learned ? "none" : "";
   $("cd-points").textContent = `+${points}`;
   $("cd-instruction").textContent = message;
   showScreen("screen-challenge-done");
@@ -500,12 +551,19 @@ $("cd-continue").addEventListener("click", () => {
 // ============================================================
 // FLASHCARDS
 // ============================================================
-function startFlashcards(unit) {
+// mode: "learn" (Flashcards challenge — reading aloud is optional practice)
+//       "speaking" (Speaking test — score = how many words read aloud correctly)
+function startFlashcards(unit, mode) {
+  fcMode = mode || "learn";
   fcIndex = 0;
   fcReadCorrect = new Set();
-  $("fc-title").textContent = "Learn — then read each word aloud 🎤";
-  // Hide the "Read it" button entirely where speech recognition isn't available.
-  $("fc-read").style.display = SpeechRecognitionAPI ? "" : "none";
+  $("fc-title").textContent =
+    fcMode === "speaking"
+      ? "Speaking — hold 🎤 and read each word aloud"
+      : "Learn — study each word";
+  // "Hold to read" belongs to the Speaking test only. Flashcards is pure
+  // learning, so hide it there (also hidden where speech isn't supported).
+  $("fc-read").style.display = fcMode === "speaking" && SpeechRecognitionAPI ? "" : "none";
   renderFlashcard(unit);
   showScreen("screen-flashcards");
 }
@@ -536,13 +594,15 @@ function renderFlashcardDots() {
 }
 
 function finishFlashcards() {
-  const total = currentUnit.vocab.length;
-  const readCount = currentUnit.vocab.filter((v) => fcReadCorrect.has(v.id)).length;
-  const message =
-    readCount > 0
-      ? `You read ${readCount}/${total} words aloud! 🎤 Nice work!`
-      : "Nice work! Keep going.";
-  finishChallenge(currentChallenge.points, message);
+  if (fcMode === "speaking") {
+    // Speaking test: 1 point per word pronounced correctly.
+    const total = currentUnit.vocab.length;
+    const readCount = currentUnit.vocab.filter((v) => fcReadCorrect.has(v.id)).length;
+    finishChallenge(readCount, `You read ${readCount}/${total} words aloud! 🎤`);
+  } else {
+    // Learn step: no score.
+    finishChallenge(0, "You've learned these words! 🎉 Now try the tests.", true);
+  }
 }
 
 // ---- "Read it" pronunciation check -----------------------------------------
@@ -577,6 +637,47 @@ function readingMatches(heard, item) {
   return acceptableAnswers(item).some((t) => h === t || h.includes(t) || t.includes(h));
 }
 
+// ---- sound effects (synthesized, no audio files) ---------------------------
+// Reused AudioContext for the correct/incorrect chimes. Created + resumed
+// inside the press gesture (see beginReading) so iOS Safari lets it play.
+let sfxCtx = null;
+function sfxContext() {
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  if (!sfxCtx) sfxCtx = new Ctx();
+  if (sfxCtx.state === "suspended") sfxCtx.resume();
+  return sfxCtx;
+}
+
+function sfxTone(ctx, freq, at, dur, type, peak) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.0001, at);
+  gain.gain.exponentialRampToValueAtTime(peak, at + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(at);
+  osc.stop(at + dur);
+}
+
+function playDing() {
+  const ctx = sfxContext();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  sfxTone(ctx, 880.0, t, 0.16, "sine", 0.3);        // A5
+  sfxTone(ctx, 1318.5, t + 0.13, 0.30, "sine", 0.3); // E6 — "ding-ding" rising
+}
+
+function playError() {
+  const ctx = sfxContext();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  sfxTone(ctx, 220.0, t, 0.16, "square", 0.16);      // low, descending buzz
+  sfxTone(ctx, 164.8, t + 0.13, 0.26, "square", 0.16);
+}
+
 // Press-and-hold: begin recording + show the live waveform, then check on release.
 function beginReading() {
   if (!SpeechRecognitionAPI || fcRecording) return;
@@ -584,6 +685,10 @@ function beginReading() {
   fcHeardMatch = false;
   fcLastHeard = "";
   fcRecording = true;
+
+  // Unlock the sound-effect audio here, inside the press gesture, so the
+  // correct/incorrect chime can play later (iOS requires a user gesture).
+  sfxContext();
 
   // Stop any text-to-speech so the mic doesn't pick up the app's own audio.
   if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -620,6 +725,7 @@ function finalizeReading() {
   if (fcHeardMatch) {
     onReadCorrect(fcTarget);
   } else {
+    playError();
     setReadFeedback(
       "retry",
       fcLastHeard
@@ -710,6 +816,7 @@ function stopWaveform() {
 
 function onReadCorrect(item) {
   fcReadCorrect.add(item.id);
+  playDing();
   setReadFeedback("correct", "✅ 对了! Great reading! ⭐");
   renderFlashcardDots();
   // Reward with momentum: after a beat, move to the next card (or finish).
@@ -811,7 +918,7 @@ function onMatchTileClick(e) {
 }
 
 $("match-continue").addEventListener("click", () => {
-  finishChallenge(currentChallenge.points, "Nice work! Keep going.");
+  finishChallenge(matchedCount, "Nice work! Keep going."); // 1 point per matched pair
 });
 
 // ============================================================
@@ -878,16 +985,204 @@ function onQuizAnswer(btn, chosen, correct) {
 
 function finishQuiz() {
   const total = quizQuestions.length;
-  const maxPoints = currentChallenge.points;
-  const earned = Math.round((maxPoints * quizScore) / total);
   const message =
     quizScore >= total - 1
       ? `You scored ${quizScore}/${total} — mastered it! ✋ Show your teacher.`
       : quizScore >= total / 2
       ? `You scored ${quizScore}/${total} — good try! ✋ Show your teacher.`
       : `You scored ${quizScore}/${total} — let's review this together. ✋ Show your teacher.`;
-  finishChallenge(earned, message);
+  finishChallenge(quizScore, message); // 1 point per correct answer
 }
+
+// ============================================================
+// Shared multiple-choice engine (Listening + Reading tests)
+// ============================================================
+function buildMcqQuestions(unit) {
+  const count = Math.min(6, unit.vocab.length);
+  const items = shuffle(unit.vocab).slice(0, count);
+  return items.map((correct) => {
+    const distractors = shuffle(unit.vocab.filter((i) => i.id !== correct.id)).slice(0, 3);
+    return { correct, options: shuffle([correct, ...distractors]) };
+  });
+}
+
+// render(question, index) draws the prompt + options; onDone(score, total) finishes.
+function renderMcq(screenId, progressId, optionsId, render) {
+  showScreen(screenId);
+  const q = mcqQuestions[mcqIndex];
+  $(progressId).textContent = `${mcqIndex + 1} of ${mcqQuestions.length}`;
+  render(q);
+}
+
+function answerMcq(optionsId, chosen, correct, matchText, next) {
+  const btns = document.querySelectorAll(`#${optionsId} .opt-btn`);
+  btns.forEach((b) => (b.disabled = true));
+  const chosenBtn = Array.from(btns).find((b) => b.dataset.id === String(chosen.id));
+  if (chosen.id === correct.id) {
+    if (chosenBtn) chosenBtn.classList.add("correct");
+    mcqScore++;
+    playDing();
+  } else {
+    if (chosenBtn) chosenBtn.classList.add("incorrect");
+    btns.forEach((b) => { if (b.dataset.id === String(correct.id)) b.classList.add("correct"); });
+    playError();
+  }
+  setTimeout(() => { mcqIndex++; next(); }, 900);
+}
+
+function finishMcq() {
+  const total = mcqQuestions.length;
+  const message =
+    mcqScore >= total - 1
+      ? `You got ${mcqScore}/${total} — excellent! ✋ Show your teacher.`
+      : mcqScore >= total / 2
+      ? `You got ${mcqScore}/${total} — good job!`
+      : `You got ${mcqScore}/${total} — let's practice this more.`;
+  finishChallenge(mcqScore, message); // 1 point per correct answer
+}
+
+function mcqOption(opt, label) {
+  const btn = document.createElement("button");
+  btn.className = "opt-btn";
+  btn.dataset.id = opt.id;
+  btn.textContent = label;
+  return btn;
+}
+
+// ============================================================
+// LISTENING: hear the word, tap the matching character
+// ============================================================
+function startListening(unit) {
+  sfxContext(); // unlock chimes within this tap gesture
+  mcqQuestions = buildMcqQuestions(unit);
+  mcqIndex = 0;
+  mcqScore = 0;
+  renderListening();
+}
+
+function renderListening() {
+  if (mcqIndex >= mcqQuestions.length) return finishMcq();
+  renderMcq("screen-listening", "listen-progress", "listen-options", (q) => {
+    const opts = $("listen-options");
+    opts.innerHTML = "";
+    q.options.forEach((opt) => {
+      const btn = mcqOption(opt, opt.hanzi);
+      btn.addEventListener("click", () => answerMcq("listen-options", opt, q.correct, opt.hanzi, renderListening));
+      opts.appendChild(btn);
+    });
+    speak(q.correct.hanzi);
+  });
+}
+
+$("listen-replay").addEventListener("click", () => {
+  const q = mcqQuestions[mcqIndex];
+  if (q) speak(q.correct.hanzi);
+});
+
+// ============================================================
+// READING: see the character, tap the meaning
+// ============================================================
+function startReadingChallenge(unit) {
+  sfxContext();
+  mcqQuestions = buildMcqQuestions(unit);
+  mcqIndex = 0;
+  mcqScore = 0;
+  renderReadingChallenge();
+}
+
+function renderReadingChallenge() {
+  if (mcqIndex >= mcqQuestions.length) return finishMcq();
+  renderMcq("screen-reading", "reading-progress", "reading-options", (q) => {
+    $("reading-hanzi").textContent = q.correct.hanzi;
+    const opts = $("reading-options");
+    opts.innerHTML = "";
+    q.options.forEach((opt) => {
+      const btn = mcqOption(opt, opt.meaning);
+      btn.classList.add("opt-meaning");
+      btn.addEventListener("click", () => answerMcq("reading-options", opt, q.correct, opt.meaning, renderReadingChallenge));
+      opts.appendChild(btn);
+    });
+  });
+}
+
+// ============================================================
+// WRITING: trace each character (HanziWriter stroke validation)
+// ============================================================
+function startWriting(unit) {
+  sfxContext();
+  writeWords = shuffle(unit.vocab).slice(0, Math.min(6, unit.vocab.length));
+  writeIndex = 0;
+  writeDone = 0;
+  showScreen("screen-writing");
+  renderWriting();
+}
+
+function renderWriting() {
+  const word = writeWords[writeIndex];
+  $("writing-progress").textContent = `Writing (${writeIndex + 1} of ${writeWords.length})`;
+  $("writing-pinyin").textContent = word.pinyin;
+  $("writing-meaning").textContent = word.meaning;
+  setWritingFeedback("", "");
+
+  const wrap = $("writing-targets");
+  wrap.innerHTML = "";
+
+  if (!window.HanziWriter) {
+    setWritingFeedback("retry", "✍️ Writing practice needs an internet connection. Tap Skip to continue.");
+    return;
+  }
+
+  const chars = Array.from(word.hanzi);
+  const size = chars.length > 1 ? 120 : 160;
+  let completed = 0;
+  chars.forEach((ch) => {
+    const cell = document.createElement("div");
+    cell.className = "writing-cell";
+    wrap.appendChild(cell);
+    const writer = window.HanziWriter.create(cell, ch, {
+      width: size,
+      height: size,
+      padding: 6,
+      showCharacter: false,
+      showOutline: true,
+      showHintAfterMisses: 3,
+      highlightOnComplete: true,
+      drawingWidth: 30,
+    });
+    writer.quiz({
+      onComplete: () => {
+        completed++;
+        if (completed === chars.length) onWritingWordDone();
+      },
+    });
+  });
+}
+
+function onWritingWordDone() {
+  writeDone++;
+  playDing();
+  setWritingFeedback("correct", "✅ 写对了! Well written!");
+  setTimeout(nextWritingWord, 1100);
+}
+
+function nextWritingWord() {
+  writeIndex++;
+  if (writeIndex < writeWords.length) renderWriting();
+  else finishWriting();
+}
+
+function finishWriting() {
+  const total = writeWords.length;
+  finishChallenge(writeDone, `You wrote ${writeDone}/${total} characters! ✍️`); // 1 point each
+}
+
+function setWritingFeedback(state, msg) {
+  const el = $("writing-feedback");
+  el.className = "fc-read-feedback " + (state || "");
+  el.textContent = msg || "";
+}
+
+$("writing-skip").addEventListener("click", nextWritingWord);
 
 // ============================================================
 // Init
