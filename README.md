@@ -28,6 +28,16 @@ fullscreen, indistinguishable from a native app to students).
   `{ id, hanzi, pinyin, meaning }` — adding a new unit's content means
   writing a new vocab array and flipping `available: true` in the
   `CURRICULUM` object.
+- **Daily Challenge** is a mini-game on the home screen: a 60-second,
+  infinite-questions timed quiz that draws from the vocab of every unit the
+  student has already completed (mixing "read it → tap the meaning" and
+  "hear it → tap the character" questions), rewarding 1 star per correct
+  answer. It unlocks after finishing one unit anywhere in the curriculum,
+  and can be played once every 24 hours — the 24h cooldown is enforced
+  server-side (`api/minigame-complete.js`), not just in the UI. Unlike
+  regular challenges (best-attempt only), mini-game points accumulate
+  across every daily play, since the goal is to reward showing up, not to
+  cap a single high score.
 
 ### Curriculum status — Level 1 covers all 12 YCT lessons
 

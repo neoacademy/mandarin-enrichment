@@ -287,7 +287,7 @@ const CURRICULUM = [
 // ============================================================
 let studentName = "";
 let studentEmail = "";
-let studentRecord = { completed: {}, totalPoints: 0, location: null };
+let studentRecord = { completed: {}, totalPoints: 0, location: null, miniGamePoints: 0, lastMiniGameAt: null };
 let currentLevel = null;
 let currentUnit = null;
 let currentChallenge = null;
@@ -303,6 +303,18 @@ let mcqQuestions = [], mcqIndex = 0, mcqScore = 0;
 let writeWords = [], writeIndex = 0, writeDone = 0;
 let matchSelectedHanzi = null;
 let matchedCount = 0;
+
+// Daily Challenge mini-game: a 60s timed rapid-fire quiz over vocab from
+// every unit the student has already completed, playable once per 24h.
+const MINIGAME_DURATION_S = 60;
+const MINIGAME_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+let mgScore = 0;
+let mgTimeLeft = MINIGAME_DURATION_S;
+let mgInterval = null;
+let mgQuestion = null;
+let mgPool = [];
+let mgActive = false;
+let mgAnswering = false; // true between an answer tap and the next question, to ignore double-taps
 
 // Tracks which vocab ids the student pronounced correctly during the current
 // flashcards run, so we can reward them and show a read-aloud tally.
@@ -355,7 +367,9 @@ const SCREEN_DEPTH = {
 };
 
 function goHome() {
+  stopMiniGameIfRunning();
   renderLevels();
+  renderMiniGameCard();
   showScreen("screen-home");
   postLocation("Home");
 }
@@ -477,9 +491,10 @@ async function initAuth() {
     document.body.classList.add("preview-mode");
     studentName = "Student view";
     studentEmail = "";
-    studentRecord = { completed: {}, totalPoints: 0, location: null };
+    studentRecord = { completed: {}, totalPoints: 0, location: null, miniGamePoints: 0, lastMiniGameAt: null };
     updateHeader();
     renderLevels();
+    renderMiniGameCard();
     showScreen("screen-home");
     return;
   }
@@ -508,6 +523,8 @@ async function initAuth() {
       completed: record.completed || {},
       totalPoints: record.totalPoints || 0,
       location: record.location || null,
+      miniGamePoints: record.miniGamePoints || 0,
+      lastMiniGameAt: record.lastMiniGameAt || null,
     };
   } catch (e) {
     console.warn("Could not load student record:", e);
@@ -515,6 +532,7 @@ async function initAuth() {
 
   updateHeader();
   renderLevels();
+  renderMiniGameCard();
   showScreen("screen-home");
   postLocation("Home");
 }
@@ -618,6 +636,206 @@ function renderUnits(level) {
     list.appendChild(step);
   });
 }
+
+// ============================================================
+// DAILY CHALLENGE (mini-game): a 60s timed rapid quiz over vocab from every
+// unit the student has already completed, playable once per 24h. Unlocked
+// after finishing at least one unit anywhere in the curriculum.
+// ============================================================
+function hasCompletedAnyUnit() {
+  return CURRICULUM.some((level) => level.units.some((unit) => isUnitComplete(level, unit)));
+}
+
+// Vocab ids only unique *within* a unit (every lesson array restarts at 1),
+// so this pool is used and compared by object reference, never by id.
+function miniGameVocabPool() {
+  const pool = [];
+  CURRICULUM.forEach((level) => {
+    level.units.forEach((unit) => {
+      if (isUnitComplete(level, unit)) pool.push(...unit.vocab);
+    });
+  });
+  return pool;
+}
+
+function formatCooldown(ms) {
+  const totalMin = Math.max(1, Math.ceil(ms / 60000));
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function renderMiniGameCard() {
+  const card = $("minigame-card");
+  if (!card) return;
+
+  if (!hasCompletedAnyUnit()) {
+    card.className = "minigame-card locked";
+    card.innerHTML = `
+      <div class="mg-card-title">🎮 Daily Challenge</div>
+      <div class="mg-card-sub">🔒 Finish your first lesson to unlock!</div>
+    `;
+    card.onclick = null;
+    return;
+  }
+
+  const remaining = MINIGAME_COOLDOWN_MS - (Date.now() - (studentRecord.lastMiniGameAt || 0));
+  if (remaining > 0) {
+    card.className = "minigame-card cooldown";
+    card.innerHTML = `
+      <div class="mg-card-title">🎮 Daily Challenge</div>
+      <div class="mg-card-sub">✅ Done for today! Next one in ${formatCooldown(remaining)}</div>
+    `;
+    card.onclick = null;
+    return;
+  }
+
+  card.className = "minigame-card ready";
+  card.innerHTML = `
+    <div class="mg-card-title">🎮 Daily Challenge</div>
+    <div class="mg-card-sub">Ready! Answer as many as you can in 60 seconds ⭐</div>
+  `;
+  card.onclick = openMiniGameIntro;
+}
+
+function openMiniGameIntro() {
+  if (!hasCompletedAnyUnit()) return; // defensive; card isn't clickable otherwise
+  showScreen("screen-minigame-intro");
+  postLocation("Daily Challenge");
+}
+
+function stopMiniGameIfRunning() {
+  if (mgInterval) { clearInterval(mgInterval); mgInterval = null; }
+  mgActive = false;
+}
+
+function startMiniGame() {
+  mgPool = miniGameVocabPool();
+  mgScore = 0;
+  mgTimeLeft = MINIGAME_DURATION_S;
+  mgActive = true;
+  mgAnswering = false;
+  $("mg-score").textContent = "0";
+  $("mg-timer").textContent = String(mgTimeLeft);
+  sfxContext(); // unlock chimes within this tap gesture
+  showScreen("screen-minigame");
+  renderMiniGameQuestion();
+  mgInterval = setInterval(tickMiniGame, 1000);
+}
+
+function tickMiniGame() {
+  mgTimeLeft--;
+  $("mg-timer").textContent = String(Math.max(0, mgTimeLeft));
+  if (mgTimeLeft <= 0) {
+    clearInterval(mgInterval);
+    mgInterval = null;
+    finishMiniGame();
+  }
+}
+
+// Alternates between "reading" (see hanzi, tap the meaning) and "listening"
+// (hear it, tap the hanzi) so revision exercises both senses.
+function buildMiniGameQuestion(pool) {
+  const mode = Math.random() < 0.5 ? "reading" : "listening";
+  const field = mode === "reading" ? "meaning" : "hanzi";
+  const correct = pool[Math.floor(Math.random() * pool.length)];
+
+  // Prefer distractors with distinct display text — vocab repeats across
+  // lessons (e.g. the Lesson 12 review set), and two options that look
+  // identical would be confusing.
+  const usedText = new Set([correct[field]]);
+  const rest = shuffle(pool.filter((v) => v !== correct));
+  const distractors = [];
+  for (const v of rest) {
+    if (distractors.length >= 3) break;
+    if (usedText.has(v[field])) continue;
+    usedText.add(v[field]);
+    distractors.push(v);
+  }
+  // Fallback for a very small pool: allow text repeats rather than serve
+  // fewer than 4 options.
+  for (const v of rest) {
+    if (distractors.length >= 3) break;
+    if (!distractors.includes(v)) distractors.push(v);
+  }
+
+  return { mode, correct, options: shuffle([correct, ...distractors]) };
+}
+
+function renderMiniGameQuestion() {
+  mgQuestion = buildMiniGameQuestion(mgPool);
+  const q = mgQuestion;
+
+  $("mg-mode-label").textContent = q.mode === "reading" ? "📖 Tap the meaning" : "👂 Tap what you hear";
+  $("mg-prompt").innerHTML =
+    q.mode === "reading"
+      ? `<p class="hanzi mg-hanzi">${q.correct.hanzi}</p>`
+      : `<button class="speak-btn" id="mg-replay">🔊 Play again</button>`;
+  if (q.mode === "listening") {
+    $("mg-replay").addEventListener("click", () => speak(q.correct.hanzi));
+    speak(q.correct.hanzi);
+  }
+
+  const opts = $("mg-options");
+  opts.innerHTML = "";
+  q.options.forEach((opt) => {
+    const btn = document.createElement("button");
+    btn.className = "opt-btn" + (q.mode === "reading" ? " opt-meaning" : "");
+    btn.textContent = q.mode === "reading" ? opt.meaning : opt.hanzi;
+    btn.addEventListener("click", () => answerMiniGame(btn, opt));
+    opts.appendChild(btn);
+  });
+}
+
+function answerMiniGame(btn, chosen) {
+  if (mgAnswering || !mgActive) return;
+  mgAnswering = true;
+  document.querySelectorAll("#mg-options .opt-btn").forEach((b) => (b.disabled = true));
+
+  const correct = mgQuestion.correct;
+  const correctLabel = mgQuestion.mode === "reading" ? correct.meaning : correct.hanzi;
+  if (chosen === correct) {
+    btn.classList.add("correct");
+    mgScore++;
+    $("mg-score").textContent = String(mgScore);
+    playDing();
+  } else {
+    btn.classList.add("incorrect");
+    document.querySelectorAll("#mg-options .opt-btn").forEach((b) => {
+      if (b.textContent === correctLabel) b.classList.add("correct");
+    });
+    playError();
+  }
+
+  setTimeout(() => {
+    mgAnswering = false;
+    if (mgActive && mgTimeLeft > 0) renderMiniGameQuestion();
+  }, 500);
+}
+
+function finishMiniGame() {
+  mgActive = false;
+  const earned = mgScore;
+
+  studentRecord.miniGamePoints = (studentRecord.miniGamePoints || 0) + earned;
+  studentRecord.lastMiniGameAt = Date.now();
+  studentRecord.totalPoints =
+    Object.values(studentRecord.completed).reduce((a, b) => a + b, 0) + studentRecord.miniGamePoints;
+  updateHeader();
+
+  postJSON("/api/minigame-complete", { points: earned });
+
+  $("mg-done-score").textContent = `+${earned}`;
+  $("mg-done-message").textContent =
+    earned === 0
+      ? "Come back tomorrow for another round!"
+      : `You answered ${earned} correctly! Come back tomorrow for another round.`;
+  showScreen("screen-minigame-done");
+}
+
+$("mg-start-btn").addEventListener("click", startMiniGame);
+$("mg-intro-back-btn").addEventListener("click", goHome);
+$("mg-done-continue").addEventListener("click", goHome);
 
 // ============================================================
 // UNIT: CHALLENGE LIST

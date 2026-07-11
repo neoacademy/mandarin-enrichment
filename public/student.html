@@ -31,7 +31,43 @@
 <div id="screen-home" class="screen">
   <h1>Levels</h1>
   <p class="subtitle">Pick a level to see its units</p>
+  <div class="minigame-card" id="minigame-card"></div>
   <div class="card-list" id="level-list"></div>
+</div>
+
+<!-- DAILY CHALLENGE: intro -->
+<div id="screen-minigame-intro" class="screen">
+  <h1>🎮 Daily Challenge</h1>
+  <p class="subtitle">Revise words from lessons you've finished</p>
+  <div class="mg-intro-card">
+    <p>You'll get <strong>60 seconds</strong>. Answer as many questions as you
+    can — every correct answer earns a star. Wrong answers just move you on
+    to the next one, so keep tapping!</p>
+  </div>
+  <button id="mg-start-btn">Start</button>
+  <button class="ghost" id="mg-intro-back-btn">Back to Levels</button>
+</div>
+
+<!-- DAILY CHALLENGE: active game -->
+<div id="screen-minigame" class="screen">
+  <div class="mg-stats">
+    <div class="mg-stat"><span class="mg-stat-label">⏱️ Time</span><span id="mg-timer">60</span></div>
+    <div class="mg-stat"><span class="mg-stat-label">⭐ Score</span><span id="mg-score">0</span></div>
+  </div>
+  <p class="subtitle" id="mg-mode-label">Tap the meaning</p>
+  <div id="mg-prompt"></div>
+  <div class="quiz-options" id="mg-options"></div>
+</div>
+
+<!-- DAILY CHALLENGE: results -->
+<div id="screen-minigame-done" class="screen">
+  <div class="points-earned-banner">
+    <div class="checkpoint-label">You earned</div>
+    <div class="points-earned-value" id="mg-done-score">+0</div>
+    <div class="checkpoint-label">stars!</div>
+  </div>
+  <p class="checkpoint-instruction" id="mg-done-message">Nice work!</p>
+  <button id="mg-done-continue">Back to Levels</button>
 </div>
 
 <!-- LEVEL: UNIT SELECT -->

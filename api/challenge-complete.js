@@ -25,7 +25,8 @@ module.exports = async (req, res) => {
     student.name = session.name;
     const prevBest = student.completed[challengeKey] || 0;
     student.completed[challengeKey] = Math.max(prevBest, points);
-    student.totalPoints = Object.values(student.completed).reduce((sum, p) => sum + p, 0);
+    student.totalPoints =
+      Object.values(student.completed).reduce((sum, p) => sum + p, 0) + (student.miniGamePoints || 0);
     if (location) student.location = location;
     student.updatedAt = Date.now();
     await setStudent(email, student);
