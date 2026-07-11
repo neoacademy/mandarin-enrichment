@@ -116,6 +116,16 @@ select, input[type=text] {
 
 .speak-btn { background: #FFD469; color: #2B2B2B; font-size: 1.4rem; }
 
+/* Sign-in page: "Preview the student app" launcher (no login) */
+.preview-launch {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #EAE3D6;
+  width: 100%;
+  max-width: 320px;
+}
+.preview-hint { font-size: 0.8rem; color: #9A9A8E; margin-top: 4px; }
+
 /* Persistent top banner */
 .app-header {
   display: none;

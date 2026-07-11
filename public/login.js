@@ -51,6 +51,13 @@ async function checkExistingSession() {
 }
 
 window.onload = () => {
+  // "Preview the student app" — opens the student app in a no-login sandbox.
+  // Wired up first so it always works even if Google Sign-In fails to load
+  // (e.g. offline or on localhost, where the auth endpoints don't exist).
+  $("preview-btn").addEventListener("click", () => {
+    window.location.href = "/student.html?preview=1";
+  });
+
   checkExistingSession();
 
   if (!window.google || !window.google.accounts) {

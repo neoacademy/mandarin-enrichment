@@ -9,43 +9,71 @@
 //   meaning - short English gloss shown on flashcards & in quiz prompts
 // ============================================================
 
-const NUMBERS_VOCAB = [
-  { id: 1, hanzi: "一", pinyin: "yī", meaning: "1" },
-  { id: 2, hanzi: "二", pinyin: "èr", meaning: "2" },
-  { id: 3, hanzi: "三", pinyin: "sān", meaning: "3" },
-  { id: 4, hanzi: "四", pinyin: "sì", meaning: "4" },
-  { id: 5, hanzi: "五", pinyin: "wǔ", meaning: "5" },
-  { id: 6, hanzi: "六", pinyin: "liù", meaning: "6" },
-  { id: 7, hanzi: "七", pinyin: "qī", meaning: "7" },
-  { id: 8, hanzi: "八", pinyin: "bā", meaning: "8" },
-  { id: 9, hanzi: "九", pinyin: "jiǔ", meaning: "9" },
-  { id: 10, hanzi: "十", pinyin: "shí", meaning: "10" },
+// ------------------------------------------------------------
+// Vocab is drawn straight from the YCT 1 Standard Course textbook
+// (Confucius Institute HQ / Hanban), one array per lesson's
+// "Let's learn" word list. meaning is kept short and distinct within
+// a unit so the matching game and quiz never have two items that look
+// like the same answer.
+// ------------------------------------------------------------
+
+// Lesson 1 — 你好！(Hello!): greetings + numbers 1–10
+const L1_GREETINGS_VOCAB = [
+  { id: 1, hanzi: "你", pinyin: "nǐ", meaning: "you" },
+  { id: 2, hanzi: "好", pinyin: "hǎo", meaning: "good" },
+  { id: 3, hanzi: "老师", pinyin: "lǎoshī", meaning: "teacher" },
+  { id: 4, hanzi: "再见", pinyin: "zàijiàn", meaning: "goodbye" },
+  { id: 5, hanzi: "一", pinyin: "yī", meaning: "1" },
+  { id: 6, hanzi: "二", pinyin: "èr", meaning: "2" },
+  { id: 7, hanzi: "三", pinyin: "sān", meaning: "3" },
+  { id: 8, hanzi: "四", pinyin: "sì", meaning: "4" },
+  { id: 9, hanzi: "五", pinyin: "wǔ", meaning: "5" },
+  { id: 10, hanzi: "六", pinyin: "liù", meaning: "6" },
+  { id: 11, hanzi: "七", pinyin: "qī", meaning: "7" },
+  { id: 12, hanzi: "八", pinyin: "bā", meaning: "8" },
+  { id: 13, hanzi: "九", pinyin: "jiǔ", meaning: "9" },
+  { id: 14, hanzi: "十", pinyin: "shí", meaning: "10" },
 ];
 
-const COLORS_VOCAB = [
-  { id: 1, hanzi: "红", pinyin: "hóng", meaning: "red" },
-  { id: 2, hanzi: "橙", pinyin: "chéng", meaning: "orange" },
-  { id: 3, hanzi: "黄", pinyin: "huáng", meaning: "yellow" },
-  { id: 4, hanzi: "绿", pinyin: "lǜ", meaning: "green" },
-  { id: 5, hanzi: "蓝", pinyin: "lán", meaning: "blue" },
-  { id: 6, hanzi: "紫", pinyin: "zǐ", meaning: "purple" },
-  { id: 7, hanzi: "黑", pinyin: "hēi", meaning: "black" },
-  { id: 8, hanzi: "白", pinyin: "bái", meaning: "white" },
-  { id: 9, hanzi: "粉", pinyin: "fěn", meaning: "pink" },
-  { id: 10, hanzi: "棕", pinyin: "zōng", meaning: "brown" },
+// Lesson 2 — 你叫什么？(What's your name?)
+const L2_NAME_VOCAB = [
+  { id: 1, hanzi: "我", pinyin: "wǒ", meaning: "I, me" },
+  { id: 2, hanzi: "叫", pinyin: "jiào", meaning: "to be called" },
+  { id: 3, hanzi: "什么", pinyin: "shénme", meaning: "what" },
+  { id: 4, hanzi: "认识", pinyin: "rènshi", meaning: "to know" },
+  { id: 5, hanzi: "很", pinyin: "hěn", meaning: "very" },
+  { id: 6, hanzi: "高兴", pinyin: "gāoxìng", meaning: "glad" },
+  { id: 7, hanzi: "她", pinyin: "tā", meaning: "she, her" },
+  { id: 8, hanzi: "吗", pinyin: "ma", meaning: "question word" },
+  { id: 9, hanzi: "不", pinyin: "bù", meaning: "not" },
 ];
 
-const FAMILY_VOCAB = [
-  { id: 1, hanzi: "爸爸", pinyin: "bàba", meaning: "dad" },
-  { id: 2, hanzi: "妈妈", pinyin: "māma", meaning: "mom" },
+// Lesson 3 — 他是谁？(Who is he?)
+const L3_WHOIS_VOCAB = [
+  { id: 1, hanzi: "他", pinyin: "tā", meaning: "he, him" },
+  { id: 2, hanzi: "是", pinyin: "shì", meaning: "to be (is)" },
+  { id: 3, hanzi: "谁", pinyin: "shéi", meaning: "who" },
+  { id: 4, hanzi: "哪", pinyin: "nǎ", meaning: "which" },
+  { id: 5, hanzi: "国", pinyin: "guó", meaning: "country" },
+  { id: 6, hanzi: "人", pinyin: "rén", meaning: "person" },
+  { id: 7, hanzi: "中国", pinyin: "Zhōngguó", meaning: "China" },
+  { id: 8, hanzi: "中国人", pinyin: "Zhōngguórén", meaning: "Chinese person" },
+];
+
+// Lesson 4 — 我家有四口人 (There are four people in my family)
+const L4_FAMILY_VOCAB = [
+  { id: 1, hanzi: "爸爸", pinyin: "bàba", meaning: "father" },
+  { id: 2, hanzi: "妈妈", pinyin: "māma", meaning: "mother" },
   { id: 3, hanzi: "哥哥", pinyin: "gēge", meaning: "older brother" },
   { id: 4, hanzi: "姐姐", pinyin: "jiějie", meaning: "older sister" },
-  { id: 5, hanzi: "弟弟", pinyin: "dìdi", meaning: "younger brother" },
-  { id: 6, hanzi: "妹妹", pinyin: "mèimei", meaning: "younger sister" },
-  { id: 7, hanzi: "爷爷", pinyin: "yéye", meaning: "grandpa" },
-  { id: 8, hanzi: "奶奶", pinyin: "nǎinai", meaning: "grandma" },
-  { id: 9, hanzi: "儿子", pinyin: "érzi", meaning: "son" },
-  { id: 10, hanzi: "女儿", pinyin: "nǚ'ér", meaning: "daughter" },
+  { id: 5, hanzi: "妹妹", pinyin: "mèimei", meaning: "younger sister" },
+  { id: 6, hanzi: "家", pinyin: "jiā", meaning: "family, home" },
+  { id: 7, hanzi: "有", pinyin: "yǒu", meaning: "to have" },
+  { id: 8, hanzi: "几", pinyin: "jǐ", meaning: "how many" },
+  { id: 9, hanzi: "口", pinyin: "kǒu", meaning: "measure: people" },
+  { id: 10, hanzi: "和", pinyin: "hé", meaning: "and" },
+  { id: 11, hanzi: "没有", pinyin: "méiyǒu", meaning: "not have" },
+  { id: 12, hanzi: "个", pinyin: "gè", meaning: "measure: general" },
 ];
 
 function standardChallenges() {
@@ -58,21 +86,26 @@ function standardChallenges() {
 
 const CURRICULUM = [
   {
-    id: "level1", title: "Level 1", subtitle: "Beginner",
+    id: "level1", title: "Level 1", subtitle: "YCT 1 · Beginner",
     units: [
       {
-        id: "unit1", title: "Unit 1", theme: "Numbers 1–10 (数字 1–10)", available: true,
-        vocab: NUMBERS_VOCAB,
+        id: "unit1", title: "Lesson 1", theme: "你好！Hello! (greetings + 1–10)", available: true,
+        vocab: L1_GREETINGS_VOCAB,
         challenges: standardChallenges(),
       },
       {
-        id: "unit2", title: "Unit 2", theme: "Colors (颜色)", available: true,
-        vocab: COLORS_VOCAB,
+        id: "unit2", title: "Lesson 2", theme: "你叫什么？What's your name?", available: true,
+        vocab: L2_NAME_VOCAB,
         challenges: standardChallenges(),
       },
       {
-        id: "unit3", title: "Unit 3", theme: "Family (家人)", available: true,
-        vocab: FAMILY_VOCAB,
+        id: "unit3", title: "Lesson 3", theme: "他是谁？Who is he?", available: true,
+        vocab: L3_WHOIS_VOCAB,
+        challenges: standardChallenges(),
+      },
+      {
+        id: "unit4", title: "Lesson 4", theme: "我家有四口人 My family", available: true,
+        vocab: L4_FAMILY_VOCAB,
         challenges: standardChallenges(),
       },
     ],
@@ -112,11 +145,12 @@ let quizQuestions = [];
 let matchSelectedHanzi = null;
 let matchedCount = 0;
 
-// When a teacher opens the student app via the dashboard's "Student view"
-// toggle, ?preview=1 puts this page into a read-only sandbox: the real
-// signed-in identity and saved progress are ignored, and nothing is written
-// back to the server. That way a teacher trying out the student experience
-// never creates a student record or pollutes the live class dashboard.
+// The sign-in page's "Preview the student app" button opens this page with
+// ?preview=1, which puts it into a no-login sandbox: no Google sign-in is
+// required, the real identity and saved progress are ignored, and nothing is
+// written back to the server. This is how anyone can try out the lessons
+// (including on localhost, where the auth endpoints don't exist) without
+// creating a student record or touching the live class dashboard.
 const PREVIEW = new URLSearchParams(window.location.search).has("preview");
 
 function $(id) { return document.getElementById(id); }
@@ -190,16 +224,15 @@ $("home-btn").addEventListener("click", () => {
 });
 
 $("logout-btn").addEventListener("click", async () => {
-  if (PREVIEW) { window.location.href = "/teacher.html"; return; }
+  if (PREVIEW) { window.location.href = "/index.html"; return; }
   await postJSON("/api/auth/logout", {});
   window.location.href = "/index.html";
 });
 
-// Preview-mode "Exit to dashboard" button — returns the teacher to their
-// dashboard without touching their session.
+// Preview-mode "Exit preview" button — returns to the sign-in page.
 if ($("preview-exit-btn")) {
   $("preview-exit-btn").addEventListener("click", () => {
-    window.location.href = "/teacher.html";
+    window.location.href = "/index.html";
   });
 }
 

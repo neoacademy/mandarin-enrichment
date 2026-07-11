@@ -13,9 +13,10 @@ fullscreen, indistinguishable from a native app to students).
 ## Structure
 
 - **Levels** (1, 2, 3) → **Units** (themed vocab sets) → **Challenges**
-  (Flashcards, Matching Game, Quiz). Level 1 has three fully built units:
-  Numbers 1–10, Colors, and Family. Levels 2–3 are placeholders showing where
-  future content goes.
+  (Flashcards, Matching Game, Quiz). Level 1 is built from the **YCT 1
+  Standard Course** textbook — its units are Lessons 1–4 (你好！greetings +
+  numbers, 你叫什么？names, 他是谁？who/nationality, 我家有四口人 family).
+  Levels 2–3 are placeholders showing where future content goes.
 - Each challenge awards points on completion (Flashcards 10, Matching 15,
   Quiz up to 30, scaled by score). A persistent top banner shows the
   student's running total. Re-completing a challenge only raises the score
@@ -142,7 +143,7 @@ ever need to rotate them).
 
 ## Known limitations (it's a prototype)
 
-- Only Level 1 (3 units) has real content; Levels 2–3 are placeholders.
+- Only Level 1 (YCT 1, Lessons 1–4) has real content; Levels 2–3 are placeholders.
 - Audio uses the iPad's built-in Mandarin text-to-speech (Safari supports
   `zh-CN` voices natively) rather than recorded native-speaker audio.
 - The local (`server.js`) version has no login and separate in-memory
