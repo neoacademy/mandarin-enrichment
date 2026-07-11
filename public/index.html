@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Mandarin Practice — Sign In</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<div id="screen-login" class="screen active">
+  <h1>Mandarin Practice</h1>
+  <p class="subtitle">Sign in with your school Google account</p>
+  <div id="g_signin_container"></div>
+  <p class="checkpoint-instruction" id="login-error" style="display:none; color:#E8491D;"></p>
+  <p class="checkpoint-instruction" id="login-loading">Checking sign-in status…</p>
+</div>
+
+<script src="login.js"></script>
+</body>
+</html>

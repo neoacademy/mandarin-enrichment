@@ -24,16 +24,23 @@ fullscreen, indistinguishable from a native app to students).
   `{ id, hanzi, pinyin, meaning }` — adding a new unit's content means
   writing a new vocab array and flipping `available: true` in the
   `CURRICULUM` object.
+- Sign-in is Google SSO restricted to `@neoacademy.id` accounts. Signing in
+  with an email on the `TEACHER_EMAILS` allowlist (see below) opens the
+  dashboard; every other `@neoacademy.id` account opens the student app.
+  There's no manual roster anymore — a student's record is created
+  automatically the first time they sign in.
 
 ## Two ways to run this
 
-### 1. Local network (what we built and tested first)
+### 1. Local network (quick testing only — no login)
 
-Good for: testing, or running entirely within school wifi with no internet
-dependency.
+Good for: testing a challenge or curriculum change before pushing it live.
+This version does **not** have Google sign-in — it's the simpler,
+name-picker version we built first, kept around purely as a fast local
+testing tool. Real classroom use should go through the Vercel deployment
+below, since that's the version with actual access control.
 
-Requires [Node.js](https://nodejs.org) on a laptop/mini PC connected to the
-same wifi as the iPads.
+Requires [Node.js](https://nodejs.org).
 
 ```
 cd iPad-Learning-App
@@ -45,76 +52,83 @@ The terminal prints something like:
 
 ```
 Local:   http://localhost:3000
-Network: http://192.168.1.42:3000  <-- use this on the iPads
+Network: http://192.168.1.42:3000
 ```
 
-Progress is stored in that process's memory — it resets if the server
-restarts, and only reaches devices on the same wifi network. Keep the
-terminal open for the whole class session. Give the host computer a
-static/reserved IP on your router so the address doesn't change between
-sessions.
+Progress here is stored in memory and resets when the server restarts —
+expected, since it's just for testing.
 
-### 2. Public internet, via Vercel + Upstash (for access from anywhere)
+### 2. Public internet, via Vercel + Upstash + Google Sign-In (production)
 
-Good for: students reaching the app from home, or not depending on a laptop
-being on and connected during class.
+This is what real students and the teacher use. It runs on Vercel
+(serverless — no process to keep running), stores student progress in
+Upstash Redis (since serverless functions don't share memory between
+requests), and gates access with Google Sign-In restricted to your school
+domain.
 
-This path uses Vercel to host the app (serverless — no process to keep
-running) and Upstash Redis (free tier) to store student progress, since
-serverless functions don't share memory between requests the way a local
-Node process does. Steps:
+**A. Push the code to GitHub** — already done if you've been through this
+once. For changes going forward: edit, then `git add . && git commit -m "..."
+&& git push`. Vercel redeploys automatically on every push to `main`.
 
-**A. Push the code to GitHub**
-1. Create a new repository on [github.com](https://github.com) (keep it
-   private if you'd rather not have it public).
-2. From Terminal, in this folder:
-   ```
-   git init
-   git add .
-   git commit -m "Mandarin enrichment app"
-   git branch -M main
-   git remote add origin <your-repo-url>
-   git push -u origin main
-   ```
+**B. Upstash Redis** — already set up (see Vercel project's environment
+variables for `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` if you
+ever need to rotate them).
 
-**B. Create a free Upstash Redis database**
-1. Sign up at [upstash.com](https://upstash.com) (free tier: 256MB, 500K
-   requests/month — far more than a class of 32 will use).
-2. Create a new Redis database (any region close to you).
-3. On the database's page, copy the **REST URL** and **REST TOKEN** — you'll
-   need both in the next step.
+**C. Setting up Google Sign-In** (one-time setup)
 
-**C. Deploy on Vercel**
-1. Sign up at [vercel.com](https://vercel.com) using your GitHub account.
-   - **Check which plan you're on before adding payment info.** Hobby is
-     free but its terms restrict it to non-commercial projects — if this
-     course charges parents a fee, use the $20/month Pro plan instead.
-     Compute cost for an app this small is negligible either way; the
-     plan choice is about the commercial-use terms, not capacity.
-2. Click "Add New Project," import the GitHub repo you just pushed.
-3. Before deploying, add two environment variables (from Upstash):
-   - `UPSTASH_REDIS_REST_URL`
-   - `UPSTASH_REDIS_REST_TOKEN`
-4. Deploy. Vercel gives you a URL like `https://your-project.vercel.app`.
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) and
+   create a new project (or use an existing one).
+2. Go to **APIs & Services → OAuth consent screen**.
+   - If your Google Workspace admin account has access, set **User Type**
+     to **Internal** — this restricts sign-in to `@neoacademy.id` accounts
+     at the Google level, in addition to the domain check already built
+     into the app (`api/auth/google.js` checks the email domain
+     server-side regardless, so this is a belt-and-suspenders extra, not
+     strictly required).
+   - Fill in the required app name/support email fields.
+3. Go to **APIs & Services → Credentials → Create Credentials → OAuth
+   client ID**.
+   - Application type: **Web application**.
+   - **Authorized JavaScript origins**: add
+     `https://your-project.vercel.app` (your actual Vercel URL) and, if you
+     want to test locally, `http://localhost:3000`.
+   - You don't need to set a redirect URI — this app uses Google Identity
+     Services' token flow, not the redirect-based flow.
+4. Copy the generated **Client ID** (looks like
+   `123456-abc.apps.googleusercontent.com`). This is not a secret — it's
+   meant to be visible in front-end code.
+5. Open `public/login.js` and replace the placeholder value of
+   `GOOGLE_CLIENT_ID` at the top with your real Client ID. Commit and push.
+6. In your Vercel project's **Settings → Environment Variables**, add:
+   - `GOOGLE_CLIENT_ID` — same value as above (the server verifies tokens
+     against this).
+   - `ALLOWED_DOMAIN` — `neoacademy.id`
+   - `TEACHER_EMAILS` — comma-separated list of teacher accounts that
+     should see the dashboard, e.g. `you@neoacademy.id,other-teacher@neoacademy.id`
+7. Redeploy (push any small change, or use Vercel's "Redeploy" button) so
+   the new environment variables take effect.
 
-**D. Point Mosyle at the new URL**
-Update the Web Clips in Mosyle to use the Vercel URL instead of the local
-network address:
-- Student: `https://your-project.vercel.app/student.html`
-- Teacher: `https://your-project.vercel.app/teacher.html`
+**D. Point Mosyle at the app**
 
-**Before going live, add a password.** Right now neither the student app nor
-the teacher dashboard has any login — anyone with the URL can see student
-names and scores. That's fine on closed school wifi, but once this is a
-public internet URL, it's worth asking me to add a simple shared password
-gate before real students use it.
+- Everyone (students and teacher) — Web Clip pointing at
+  `https://your-project.vercel.app/` (the root URL is the sign-in page; it
+  automatically routes each person to the student app or teacher dashboard
+  based on their account).
 
-## Editing the class roster
+## How sign-in and roles work
 
-Open `roster.json` and replace the placeholder names with your actual
-students. This list drives both the student login dropdown and the teacher
-dashboard grid. If deploying to Vercel, commit and push this file's changes
-like any other code change — Vercel redeploys automatically on push.
+- Anyone with an `@neoacademy.id` Google account can sign in.
+- Emails on the `TEACHER_EMAILS` environment variable are treated as
+  teachers and land on the dashboard; everyone else lands on the student
+  app.
+- Sessions last 8 hours. There's a logout button (🚪) in the header of both
+  the student app and the teacher dashboard — **worth teaching students to
+  use it**, since these are shared iPads: if one student doesn't log out,
+  the next student to open the app would continue on the previous
+  student's account instead of getting their own.
+- A student's progress is tied to their Google account, not to a specific
+  iPad — they can pick up on any of the 32 devices and see their own
+  points.
 
 ## How the "verify" step works in class
 
@@ -128,11 +142,11 @@ like any other code change — Vercel redeploys automatically on push.
 
 ## Known limitations (it's a prototype)
 
-- No login/auth on either app — see the password note above before going
-  public.
 - Only Level 1 (3 units) has real content; Levels 2–3 are placeholders.
 - Audio uses the iPad's built-in Mandarin text-to-speech (Safari supports
   `zh-CN` voices natively) rather than recorded native-speaker audio.
-- The local (`server.js`) and Vercel (`/api`) versions use separate storage
-  (in-memory vs. Redis) — progress made on one won't show up on the other.
-  Pick one deployment method per class session.
+- The local (`server.js`) version has no login and separate in-memory
+  storage — it's a testing tool, not where real student data should live.
+- Logout is manual (button in the header), not automatic between students
+  on a shared iPad — worth building a habit of tapping it around when
+  handing a device to the next student.

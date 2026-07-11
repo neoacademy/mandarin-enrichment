@@ -1,18 +1,22 @@
 const { getStudent, setStudent } = require("../lib/redis");
+const { requireSession } = require("../lib/auth");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "POST only" });
   }
-  const { name, location } = req.body || {};
-  if (!name || typeof name !== "string") {
-    return res.status(400).json({ error: "name is required" });
-  }
+
+  const session = await requireSession(req, res);
+  if (!session) return;
+
+  const { location } = req.body || {};
   try {
-    const student = await getStudent(name);
+    const email = session.email;
+    const student = await getStudent(email);
+    student.name = session.name;
     student.location = location || student.location;
     student.updatedAt = Date.now();
-    await setStudent(name, student);
+    await setStudent(email, student);
     res.status(200).json({ ok: true });
   } catch (e) {
     console.error(e);

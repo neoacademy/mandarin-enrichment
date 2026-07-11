@@ -99,6 +99,7 @@ const CURRICULUM = [
 // State
 // ============================================================
 let studentName = "";
+let studentEmail = "";
 let studentRecord = { completed: {}, totalPoints: 0, location: null };
 let currentLevel = null;
 let currentUnit = null;
@@ -145,8 +146,14 @@ async function postJSON(url, body) {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(body),
     });
+    if (res.status === 401) {
+      // Session expired or was never established - back to sign-in.
+      window.location.href = "/index.html";
+      return null;
+    }
     return await res.json();
   } catch (e) {
     console.warn("Could not reach server:", e);
@@ -156,7 +163,7 @@ async function postJSON(url, body) {
 
 function postLocation(text) {
   studentRecord.location = text;
-  postJSON("/api/location", { name: studentName, location: text });
+  postJSON("/api/location", { location: text });
 }
 
 // ============================================================
@@ -174,37 +181,34 @@ $("home-btn").addEventListener("click", () => {
   postLocation("Home");
 });
 
-// ============================================================
-// LOGIN
-// ============================================================
-async function loadRoster() {
-  const select = $("name-select");
-  try {
-    const res = await fetch("/api/roster");
-    const names = await res.json();
-    names.forEach((n) => {
-      const opt = document.createElement("option");
-      opt.value = n;
-      opt.textContent = n;
-      select.appendChild(opt);
-    });
-  } catch (e) {
-    console.warn("Could not load roster:", e);
-  }
-}
-
-$("name-select").addEventListener("change", (e) => {
-  $("start-btn").disabled = !e.target.value;
+$("logout-btn").addEventListener("click", async () => {
+  await postJSON("/api/auth/logout", {});
+  window.location.href = "/index.html";
 });
 
-$("start-btn").addEventListener("click", async () => {
-  studentName = $("name-select").value;
-  if (!studentName) return;
+// ============================================================
+// AUTH: confirm the Google sign-in session, then load progress
+// ============================================================
+async function initAuth() {
+  try {
+    const res = await fetch("/api/auth/me", { credentials: "same-origin" });
+    const data = await res.json();
+    if (!data.authenticated) {
+      window.location.href = "/index.html";
+      return;
+    }
+    studentName = data.name;
+    studentEmail = data.email;
+  } catch (e) {
+    console.warn("Could not verify sign-in:", e);
+    window.location.href = "/index.html";
+    return;
+  }
 
   // Pull any existing record so progress/points carry over between
   // sessions and across different iPads.
   try {
-    const res = await fetch(`/api/student/${encodeURIComponent(studentName)}`);
+    const res = await fetch("/api/my-progress", { credentials: "same-origin" });
     const record = await res.json();
     studentRecord = {
       completed: record.completed || {},
@@ -219,7 +223,7 @@ $("start-btn").addEventListener("click", async () => {
   renderLevels();
   showScreen("screen-home");
   postLocation("Home");
-});
+}
 
 // ============================================================
 // HOME: LEVEL LIST
@@ -350,7 +354,6 @@ function finishChallenge(points, message) {
   updateHeader();
 
   postJSON("/api/challenge-complete", {
-    name: studentName,
     challengeKey: key,
     points,
     location: `${currentLevel.title} > ${currentUnit.title} > ${currentChallenge.title}`,
@@ -556,4 +559,4 @@ function finishQuiz() {
 // ============================================================
 // Init
 // ============================================================
-loadRoster();
+initAuth();
