@@ -311,6 +311,95 @@ body.preview-mode::after {
   vertical-align: middle;
 }
 
+/* Unit path (Level screen): Duolingo-style winding progression of nodes */
+.unit-path {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0 8px;
+}
+.unit-path::before {
+  content: "";
+  position: absolute;
+  top: 38px; bottom: 38px;
+  left: 50%;
+  width: 6px;
+  margin-left: -3px;
+  background: repeating-linear-gradient(to bottom, #E5DDCB 0 10px, transparent 10px 22px);
+  border-radius: 3px;
+  z-index: 0;
+}
+
+.path-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(var(--offset, 0px));
+  z-index: 1;
+  padding-bottom: 22px;
+}
+
+.path-node {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 6px 0 #D8CDB4, 0 8px 16px rgba(0,0,0,0.12);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #B79A50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.path-node:active { transform: translateY(4px); box-shadow: 0 2px 0 #D8CDB4, 0 4px 10px rgba(0,0,0,0.12); }
+.path-node.complete { background: #4CAF50; color: white; box-shadow: 0 6px 0 #3d8b40, 0 8px 16px rgba(0,0,0,0.12); }
+.path-node.locked { background: #E8E8E8; color: #B5B5B5; box-shadow: 0 6px 0 #cfcfcf; cursor: default; }
+.path-node.current {
+  background: #E8491D;
+  color: white;
+  box-shadow: 0 6px 0 #b8340f, 0 8px 16px rgba(0,0,0,0.16);
+  animation: path-pulse 1.6s ease-in-out infinite;
+}
+@keyframes path-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+
+.path-callout {
+  position: relative;
+  margin-top: 8px;
+  background: #2B2B2B;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: 10px;
+}
+.path-callout::after {
+  content: "";
+  position: absolute;
+  top: -5px; left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-bottom-color: #2B2B2B;
+}
+
+.path-label { text-align: center; margin-top: 8px; max-width: 220px; }
+.path-title { font-weight: 700; font-size: 0.95rem; }
+.path-theme { color: #7A7A7A; font-size: 0.8rem; margin-top: 2px; }
+.path-progress { color: #B79A50; font-size: 0.78rem; font-weight: 600; margin-top: 4px; }
+
 /* Challenge list */
 .challenge-card {
   display: flex;

@@ -561,21 +561,61 @@ function unitProgressText(level, unit) {
   return `${done}/${total} challenges done`;
 }
 
+function isUnitComplete(level, unit) {
+  if (!unit.available || !unit.challenges.length) return false;
+  return unit.challenges.every((c) => {
+    const key = challengeKey(level, unit, c);
+    return c.type === "flashcards" ? key in studentRecord.completed : !!studentRecord.completed[key];
+  });
+}
+
+// Horizontal offsets (px) that repeat to make the unit list wind left/right
+// down the screen, Duolingo-style, instead of a plain vertical stack.
+const PATH_OFFSETS = [0, 62, 98, 62, 0, -62, -98, -62];
+
 function renderUnits(level) {
   const list = $("unit-list");
   list.innerHTML = "";
-  level.units.forEach((unit) => {
-    const card = document.createElement("div");
-    card.className = "unit-card" + (unit.available ? "" : " locked");
-    card.innerHTML = `
-      <div class="title">${unit.title}${unit.available ? "" : '<span class="badge-soon">Coming soon</span>'}</div>
-      <div class="meta">${unit.theme}</div>
-      <div class="meta">${unitProgressText(level, unit)}</div>
-    `;
-    if (unit.available) {
-      card.addEventListener("click", () => openUnit(level, unit));
+
+  // The one unit that gets the pulsing highlight + "START" callout: the
+  // first available unit the student hasn't finished yet.
+  const nextUnit = level.units.find((u) => u.available && !isUnitComplete(level, u));
+
+  level.units.forEach((unit, i) => {
+    const complete = isUnitComplete(level, unit);
+    const isNext = unit === nextUnit;
+
+    const step = document.createElement("div");
+    step.className = "path-step";
+    step.style.setProperty("--offset", `${PATH_OFFSETS[i % PATH_OFFSETS.length]}px`);
+
+    const node = document.createElement("button");
+    node.className =
+      "path-node" +
+      (!unit.available ? " locked" : complete ? " complete" : "") +
+      (isNext ? " current" : "");
+    node.textContent = !unit.available ? "🔒" : complete ? "✓" : String(i + 1);
+    if (unit.available) node.addEventListener("click", () => openUnit(level, unit));
+    else node.disabled = true;
+    step.appendChild(node);
+
+    if (isNext) {
+      const callout = document.createElement("div");
+      callout.className = "path-callout";
+      callout.textContent = "START";
+      step.appendChild(callout);
     }
-    list.appendChild(card);
+
+    const label = document.createElement("div");
+    label.className = "path-label";
+    label.innerHTML = `
+      <div class="path-title">${unit.title}${unit.available ? "" : '<span class="badge-soon">Coming soon</span>'}</div>
+      <div class="path-theme">${unit.theme}</div>
+      <div class="path-progress">${unitProgressText(level, unit)}</div>
+    `;
+    step.appendChild(label);
+
+    list.appendChild(step);
   });
 }
 
