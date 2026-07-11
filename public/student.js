@@ -112,6 +112,13 @@ let quizQuestions = [];
 let matchSelectedHanzi = null;
 let matchedCount = 0;
 
+// When a teacher opens the student app via the dashboard's "Student view"
+// toggle, ?preview=1 puts this page into a read-only sandbox: the real
+// signed-in identity and saved progress are ignored, and nothing is written
+// back to the server. That way a teacher trying out the student experience
+// never creates a student record or pollutes the live class dashboard.
+const PREVIEW = new URLSearchParams(window.location.search).has("preview");
+
 function $(id) { return document.getElementById(id); }
 
 function showScreen(id) {
@@ -142,6 +149,7 @@ function challengeKey(level, unit, challenge) {
 }
 
 async function postJSON(url, body) {
+  if (PREVIEW) return null; // preview mode is a sandbox — never writes to the server
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -182,14 +190,36 @@ $("home-btn").addEventListener("click", () => {
 });
 
 $("logout-btn").addEventListener("click", async () => {
+  if (PREVIEW) { window.location.href = "/teacher.html"; return; }
   await postJSON("/api/auth/logout", {});
   window.location.href = "/index.html";
 });
+
+// Preview-mode "Exit to dashboard" button — returns the teacher to their
+// dashboard without touching their session.
+if ($("preview-exit-btn")) {
+  $("preview-exit-btn").addEventListener("click", () => {
+    window.location.href = "/teacher.html";
+  });
+}
 
 // ============================================================
 // AUTH: confirm the Google sign-in session, then load progress
 // ============================================================
 async function initAuth() {
+  // Teacher previewing the student app: skip the real sign-in/progress load
+  // entirely and start from a clean, in-memory sandbox record.
+  if (PREVIEW) {
+    document.body.classList.add("preview-mode");
+    studentName = "Student view";
+    studentEmail = "";
+    studentRecord = { completed: {}, totalPoints: 0, location: null };
+    updateHeader();
+    renderLevels();
+    showScreen("screen-home");
+    return;
+  }
+
   try {
     const res = await fetch("/api/auth/me", { credentials: "same-origin" });
     const data = await res.json();
