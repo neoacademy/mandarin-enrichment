@@ -12,19 +12,60 @@ fullscreen, indistinguishable from a native app to students).
 
 ## Structure
 
-- **Levels** (1, 2, 3) → **Units** (themed vocab sets) → **Challenges**
-  (Flashcards, Matching Game, Quiz). Level 1 is built from the **YCT 1
-  Standard Course** textbook — its units are Lessons 1–4 (你好！greetings +
-  numbers, 你叫什么？names, 他是谁？who/nationality, 我家有四口人 family).
-  Levels 2–3 are placeholders showing where future content goes.
-- Each challenge awards points on completion (Flashcards 10, Matching 15,
-  Quiz up to 30, scaled by score). A persistent top banner shows the
-  student's running total. Re-completing a challenge only raises the score
-  if the new attempt is better.
+- **Levels** (1, 2, 3) → **Units** (themed vocab sets) → **Challenges**.
+  Level 1 is built from the **YCT 1 Standard Course** textbook. Every Level 1
+  unit runs the full **four-skills** flow: a **Flashcards** Learn step, then
+  graded **Listening** (hear it → tap the character), **Speaking** (hold to
+  read each word aloud, checked by speech recognition), **Reading** (see the
+  character → tap the meaning), and **Writing** (trace each character
+  stroke-by-stroke, validated by the HanziWriter library). Levels 2–3 are
+  placeholders showing where future content goes.
+- Each correct answer is worth **1 point**, so a challenge's max equals its
+  number of questions. Flashcards is a Learn step and isn't scored. A
+  persistent top banner shows the student's running total, and re-completing a
+  challenge only raises the score if the new attempt is better.
 - Vocab lives in `public/student.js` as plain arrays of
   `{ id, hanzi, pinyin, meaning }` — adding a new unit's content means
   writing a new vocab array and flipping `available: true` in the
   `CURRICULUM` object.
+
+### Curriculum status — WORK IN PROGRESS (Level 1 → all 12 YCT lessons)
+
+YCT Book 1 has **12 lessons** (Lessons 1–11 + Lesson 12 Review), and the goal
+is for **Level 1 to contain all 12** as units. Current state:
+
+- **Wired up and live: Lessons 1–4 only.** The `CURRICULUM` object's `level1`
+  entry has four units (`unit1`–`unit4`) pointing at `L1_GREETINGS_VOCAB`,
+  `L2_NAME_VOCAB`, `L3_WHOIS_VOCAB`, `L4_FAMILY_VOCAB`, each using
+  `fourSkillChallenges()`.
+- **Vocab already extracted but NOT yet wired up: Lessons 5–12.** The arrays
+  `L5_AGE_VOCAB`, `L6_BODY_VOCAB`, `L7_ANIMALS_VOCAB`, `L8_PLACES_VOCAB`,
+  `L9_TIME_VOCAB`, `L10_CLOCK_VOCAB`, `L11_FOOD_VOCAB`, and `L12_REVIEW_VOCAB`
+  are already defined in `public/student.js` (pulled from the YCT 1 PDF), but
+  they are **not referenced by `CURRICULUM` yet** — so the app still shows only
+  4 lessons.
+
+**To finish (next session):** add eight more unit entries (`unit5`–`unit12`)
+to the `level1.units` array in `CURRICULUM`, one per array above, each with
+`available: true` and `challenges: fourSkillChallenges()`. Suggested
+title/theme per lesson:
+
+| unit | title | theme |
+|------|-------|-------|
+| unit5 | Lesson 5 | 我6岁 Age |
+| unit6 | Lesson 6 | 你的个子真高！Body & describing |
+| unit7 | Lesson 7 | 这是谁的狗？Animals |
+| unit8 | Lesson 8 | 我去商店 Places & going |
+| unit9 | Lesson 9 | 今天星期几？Days & dates |
+| unit10 | Lesson 10 | 现在几点？Time |
+| unit11 | Lesson 11 | 你吃什么？Food & drink |
+| unit12 | Lesson 12 | 复习 Review |
+
+After wiring, verify all 12 units render 5 challenges each and that
+Listening/Reading build valid 4-option questions (needs ≥4 vocab items —
+Lesson 5 has only 4 and Lesson 10 only 5, which is exactly the minimum, so
+double-check those two). The source PDFs are under the YCT folder in Google
+Drive (see the `yct-curriculum-source` project memory for the exact path).
 - Sign-in is Google SSO restricted to `@neoacademy.id` accounts. Signing in
   with an email on the `TEACHER_EMAILS` allowlist (see below) opens the
   dashboard; every other `@neoacademy.id` account opens the student app.
@@ -143,7 +184,9 @@ ever need to rotate them).
 
 ## Known limitations (it's a prototype)
 
-- Only Level 1 (YCT 1, Lessons 1–4) has real content; Levels 2–3 are placeholders.
+- Level 1 currently exposes YCT 1 Lessons **1–4**; Lessons 5–12 have their
+  vocab extracted but aren't wired into `CURRICULUM` yet (see "Curriculum
+  status" above). Levels 2–3 are placeholders.
 - Audio uses the iPad's built-in Mandarin text-to-speech (Safari supports
   `zh-CN` voices natively) rather than recorded native-speaker audio.
 - The local (`server.js`) version has no login and separate in-memory

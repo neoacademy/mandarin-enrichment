@@ -76,6 +76,106 @@ const L4_FAMILY_VOCAB = [
   { id: 12, hanzi: "个", pinyin: "gè", meaning: "measure: general" },
 ];
 
+// Lesson 5 — 我6岁 (I'm ... years old)
+const L5_AGE_VOCAB = [
+  { id: 1, hanzi: "岁", pinyin: "suì", meaning: "years old" },
+  { id: 2, hanzi: "多大", pinyin: "duōdà", meaning: "how old" },
+  { id: 3, hanzi: "也", pinyin: "yě", meaning: "also, too" },
+  { id: 4, hanzi: "几", pinyin: "jǐ", meaning: "how many" },
+];
+
+// Lesson 6 — 你的个子真高！(You're so tall! — body & describing)
+const L6_BODY_VOCAB = [
+  { id: 1, hanzi: "的", pinyin: "de", meaning: "'s (of)" },
+  { id: 2, hanzi: "小", pinyin: "xiǎo", meaning: "small" },
+  { id: 3, hanzi: "大", pinyin: "dà", meaning: "big" },
+  { id: 4, hanzi: "长", pinyin: "cháng", meaning: "long" },
+  { id: 5, hanzi: "个子", pinyin: "gèzi", meaning: "height" },
+  { id: 6, hanzi: "真", pinyin: "zhēn", meaning: "really" },
+  { id: 7, hanzi: "高", pinyin: "gāo", meaning: "tall" },
+  { id: 8, hanzi: "头发", pinyin: "tóufa", meaning: "hair" },
+  { id: 9, hanzi: "鼻子", pinyin: "bízi", meaning: "nose" },
+  { id: 10, hanzi: "眼睛", pinyin: "yǎnjing", meaning: "eye" },
+  { id: 11, hanzi: "手", pinyin: "shǒu", meaning: "hand" },
+  { id: 12, hanzi: "耳朵", pinyin: "ěrduo", meaning: "ear" },
+];
+
+// Lesson 7 — 这是谁的狗？(Whose dog is this? — animals & this/that)
+const L7_ANIMALS_VOCAB = [
+  { id: 1, hanzi: "这", pinyin: "zhè", meaning: "this" },
+  { id: 2, hanzi: "那", pinyin: "nà", meaning: "that" },
+  { id: 3, hanzi: "看", pinyin: "kàn", meaning: "to look" },
+  { id: 4, hanzi: "这儿", pinyin: "zhèr", meaning: "here" },
+  { id: 5, hanzi: "那儿", pinyin: "nàr", meaning: "there" },
+  { id: 6, hanzi: "多", pinyin: "duō", meaning: "many" },
+  { id: 7, hanzi: "猫", pinyin: "māo", meaning: "cat" },
+  { id: 8, hanzi: "狗", pinyin: "gǒu", meaning: "dog" },
+  { id: 9, hanzi: "鱼", pinyin: "yú", meaning: "fish" },
+  { id: 10, hanzi: "鸟", pinyin: "niǎo", meaning: "bird" },
+];
+
+// Lesson 8 — 我去商店 (I'm going to the store — places & going)
+const L8_PLACES_VOCAB = [
+  { id: 1, hanzi: "在", pinyin: "zài", meaning: "at, in" },
+  { id: 2, hanzi: "谢谢", pinyin: "xièxie", meaning: "thanks" },
+  { id: 3, hanzi: "去", pinyin: "qù", meaning: "to go" },
+  { id: 4, hanzi: "你们", pinyin: "nǐmen", meaning: "you (plural)" },
+  { id: 5, hanzi: "我们", pinyin: "wǒmen", meaning: "we" },
+  { id: 6, hanzi: "哪儿", pinyin: "nǎr", meaning: "where" },
+  { id: 7, hanzi: "学校", pinyin: "xuéxiào", meaning: "school" },
+  { id: 8, hanzi: "商店", pinyin: "shāngdiàn", meaning: "store" },
+];
+
+// Lesson 9 — 今天星期几？(What day is it? — days & dates)
+const L9_TIME_VOCAB = [
+  { id: 1, hanzi: "生日", pinyin: "shēngrì", meaning: "birthday" },
+  { id: 2, hanzi: "月", pinyin: "yuè", meaning: "month" },
+  { id: 3, hanzi: "号", pinyin: "hào", meaning: "date" },
+  { id: 4, hanzi: "今天", pinyin: "jīntiān", meaning: "today" },
+  { id: 5, hanzi: "明天", pinyin: "míngtiān", meaning: "tomorrow" },
+  { id: 6, hanzi: "昨天", pinyin: "zuótiān", meaning: "yesterday" },
+  { id: 7, hanzi: "星期", pinyin: "xīngqī", meaning: "week" },
+  { id: 8, hanzi: "喜欢", pinyin: "xǐhuan", meaning: "to like" },
+];
+
+// Lesson 10 — 现在几点？(What time is it? — clock)
+const L10_CLOCK_VOCAB = [
+  { id: 1, hanzi: "现在", pinyin: "xiànzài", meaning: "now" },
+  { id: 2, hanzi: "点", pinyin: "diǎn", meaning: "o'clock" },
+  { id: 3, hanzi: "分", pinyin: "fēn", meaning: "minute" },
+  { id: 4, hanzi: "见", pinyin: "jiàn", meaning: "to meet" },
+  { id: 5, hanzi: "早上", pinyin: "zǎoshang", meaning: "morning" },
+];
+
+// Lesson 11 — 你吃什么？(What would you like to eat? — food & drink)
+const L11_FOOD_VOCAB = [
+  { id: 1, hanzi: "米饭", pinyin: "mǐfàn", meaning: "rice" },
+  { id: 2, hanzi: "面条", pinyin: "miàntiáo", meaning: "noodles" },
+  { id: 3, hanzi: "苹果", pinyin: "píngguǒ", meaning: "apple" },
+  { id: 4, hanzi: "牛奶", pinyin: "niúnǎi", meaning: "milk" },
+  { id: 5, hanzi: "水", pinyin: "shuǐ", meaning: "water" },
+  { id: 6, hanzi: "吃", pinyin: "chī", meaning: "to eat" },
+  { id: 7, hanzi: "喝", pinyin: "hē", meaning: "to drink" },
+  { id: 8, hanzi: "爱", pinyin: "ài", meaning: "to love" },
+  { id: 9, hanzi: "蛋糕", pinyin: "dàngāo", meaning: "cake" },
+];
+
+// Lesson 12 — 复习 (Review): a mixed set spanning Lessons 1–11.
+const L12_REVIEW_VOCAB = [
+  { id: 1, hanzi: "老师", pinyin: "lǎoshī", meaning: "teacher" },
+  { id: 2, hanzi: "我", pinyin: "wǒ", meaning: "I, me" },
+  { id: 3, hanzi: "中国", pinyin: "Zhōngguó", meaning: "China" },
+  { id: 4, hanzi: "妈妈", pinyin: "māma", meaning: "mother" },
+  { id: 5, hanzi: "岁", pinyin: "suì", meaning: "years old" },
+  { id: 6, hanzi: "高", pinyin: "gāo", meaning: "tall" },
+  { id: 7, hanzi: "狗", pinyin: "gǒu", meaning: "dog" },
+  { id: 8, hanzi: "学校", pinyin: "xuéxiào", meaning: "school" },
+  { id: 9, hanzi: "今天", pinyin: "jīntiān", meaning: "today" },
+  { id: 10, hanzi: "现在", pinyin: "xiànzài", meaning: "now" },
+  { id: 11, hanzi: "苹果", pinyin: "píngguǒ", meaning: "apple" },
+  { id: 12, hanzi: "喜欢", pinyin: "xǐhuan", meaning: "to like" },
+];
+
 function standardChallenges() {
   return [
     { id: "flashcards", title: "🗂️ Flashcards", desc: "Learn each word", type: "flashcards" },
@@ -85,8 +185,9 @@ function standardChallenges() {
 }
 
 // The full "four skills" set: a Learn step (flashcards) followed by graded
-// Listening, Speaking, Reading and Writing tests. Used by Unit 1; other units
-// still use standardChallenges() until they're built out the same way.
+// Listening, Speaking, Reading and Writing tests. Used by every Level 1 unit.
+// (standardChallenges() above is the older 3-challenge model, kept for future
+// levels that aren't built out to the four-skill structure yet.)
 function fourSkillChallenges() {
   return [
     { id: "flashcards", title: "🗂️ Flashcards", desc: "Learn each word", type: "flashcards" },
@@ -109,17 +210,17 @@ const CURRICULUM = [
       {
         id: "unit2", title: "Lesson 2", theme: "你叫什么？What's your name?", available: true,
         vocab: L2_NAME_VOCAB,
-        challenges: standardChallenges(),
+        challenges: fourSkillChallenges(),
       },
       {
         id: "unit3", title: "Lesson 3", theme: "他是谁？Who is he?", available: true,
         vocab: L3_WHOIS_VOCAB,
-        challenges: standardChallenges(),
+        challenges: fourSkillChallenges(),
       },
       {
         id: "unit4", title: "Lesson 4", theme: "我家有四口人 My family", available: true,
         vocab: L4_FAMILY_VOCAB,
-        challenges: standardChallenges(),
+        challenges: fourSkillChallenges(),
       },
     ],
   },
