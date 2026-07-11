@@ -6,6 +6,8 @@ body {
   background: #FFF8EE;
   color: #2B2B2B;
   min-height: 100vh;
+  /* Disable double-tap-to-zoom (and the 300ms tap delay) across the app. */
+  touch-action: manipulation;
 }
 
 .screen {

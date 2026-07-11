@@ -157,7 +157,7 @@ let fcRecognizing = false;
 // Hold-to-record state: the student presses and holds "Read it" to record,
 // sees a live waveform, and releases to run the pronunciation check.
 let fcRecording = false;
-let fcStream = null, fcAudioCtx = null, fcAnalyser = null, fcRaf = null;
+let fcRaf = null;
 let fcRec = null, fcTarget = null, fcHeardMatch = false, fcLastHeard = "";
 
 // The sign-in page's "Preview the student app" button opens this page with
@@ -666,59 +666,46 @@ function startRecognition() {
   try { rec.start(); fcRecognizing = true; } catch (e) {}
 }
 
-// ---- live waveform (Web Audio) ---------------------------------------------
-async function startWaveform() {
+// ---- recording waveform (animated) -----------------------------------------
+// A synthetic animated waveform shown while holding the button. It is NOT
+// driven by the mic on purpose: the speech recognizer already owns the
+// microphone, and opening a second getUserMedia stream for a real analyser
+// made Chrome re-prompt for permission and starved the recognizer of audio
+// (so it couldn't catch anything). This animation just signals "recording".
+function startWaveform() {
   const canvas = $("fc-waveform");
-  if (!canvas || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  if (!canvas) return;
   canvas.classList.add("active");
-  try {
-    fcStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch (e) {
-    canvas.classList.remove("active"); // no mic for visuals; recognition may still work
-    return;
-  }
-  if (!fcRecording) { stopStream(); canvas.classList.remove("active"); return; } // released already
+  let ctx = null;
+  try { ctx = canvas.getContext("2d"); } catch (e) {}
+  if (!ctx) return;
 
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return;
-  fcAudioCtx = new Ctx();
-  const src = fcAudioCtx.createMediaStreamSource(fcStream);
-  fcAnalyser = fcAudioCtx.createAnalyser();
-  fcAnalyser.fftSize = 1024;
-  src.connect(fcAnalyser);
-
-  const data = new Uint8Array(fcAnalyser.fftSize);
-  const ctx = canvas.getContext("2d");
-  const draw = () => {
-    fcRaf = requestAnimationFrame(draw);
-    fcAnalyser.getByteTimeDomainData(data);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const W = canvas.width, H = canvas.height;
+  const now = () => (window.performance && performance.now ? performance.now() : Date.now());
+  const start = now();
+  const render = () => {
+    fcRaf = requestAnimationFrame(render);
+    const t = (now() - start) / 1000;
+    ctx.clearRect(0, 0, W, H);
     ctx.lineWidth = 2.5;
-    ctx.strokeStyle = "#4A90D9";
+    ctx.strokeStyle = fcHeardMatch ? "#4CAF50" : "#4A90D9";
     ctx.beginPath();
-    const slice = canvas.width / data.length;
-    let x = 0;
-    for (let i = 0; i < data.length; i++) {
-      const y = (data[i] / 128.0) * (canvas.height / 2);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      x += slice;
+    for (let x = 0; x <= W; x += 3) {
+      const p = x / W;
+      const envelope = 0.4 + 0.6 * Math.abs(Math.sin(t * 2.3 + p * 3.1));
+      const wobble = 0.5 + 0.5 * Math.sin(t * 6.7 + p * 9.0);
+      const y = H / 2 + Math.sin(p * 22 + t * 11) * (H * 0.34) * envelope * wobble;
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
     ctx.stroke();
   };
-  draw();
+  fcRaf = requestAnimationFrame(render);
 }
 
 function stopWaveform() {
   const canvas = $("fc-waveform");
   if (canvas) canvas.classList.remove("active");
   if (fcRaf) { cancelAnimationFrame(fcRaf); fcRaf = null; }
-  if (fcAudioCtx) { try { fcAudioCtx.close(); } catch (e) {} fcAudioCtx = null; }
-  fcAnalyser = null;
-  stopStream();
-}
-
-function stopStream() {
-  if (fcStream) { fcStream.getTracks().forEach((t) => t.stop()); fcStream = null; }
 }
 
 function onReadCorrect(item) {
