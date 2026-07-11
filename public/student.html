@@ -45,9 +45,10 @@
   <h1>🎮 Daily Challenge</h1>
   <p class="subtitle">Revise words from lessons you've finished</p>
   <div class="mg-intro-card">
-    <p>You'll get <strong>60 seconds</strong>. Answer as many questions as you
-    can — every correct answer earns a star. Wrong answers just move you on
-    to the next one, so keep tapping!</p>
+    <p>You'll get <strong>30 seconds</strong>. Each question is a random mix of
+    Listening, Speaking, Reading, or Writing — answer as many as you can,
+    every correct answer earns a star. Wrong answers just move you on to the
+    next one, so keep going!</p>
   </div>
   <button id="mg-start-btn">Start</button>
   <button class="ghost" id="mg-intro-back-btn">Back to Levels</button>
@@ -56,12 +57,13 @@
 <!-- DAILY CHALLENGE: active game -->
 <div id="screen-minigame" class="screen">
   <div class="mg-stats">
-    <div class="mg-stat"><span class="mg-stat-label">⏱️ Time</span><span id="mg-timer">60</span></div>
+    <div class="mg-stat"><span class="mg-stat-label">⏱️ Time</span><span id="mg-timer">30</span></div>
     <div class="mg-stat"><span class="mg-stat-label">⭐ Score</span><span id="mg-score">0</span></div>
   </div>
   <p class="subtitle" id="mg-mode-label">Tap the meaning</p>
   <div id="mg-prompt"></div>
   <div class="quiz-options" id="mg-options"></div>
+  <button class="ghost" id="mg-skip-btn" style="display:none;">⏭️ Skip</button>
 </div>
 
 <!-- DAILY CHALLENGE: results -->

@@ -304,9 +304,9 @@ let writeWords = [], writeIndex = 0, writeDone = 0;
 let matchSelectedHanzi = null;
 let matchedCount = 0;
 
-// Daily Challenge mini-game: a 60s timed rapid-fire quiz over vocab from
+// Daily Challenge mini-game: a 30s timed rapid-fire quiz over vocab from
 // every unit the student has already completed, playable once per 24h.
-const MINIGAME_DURATION_S = 60;
+const MINIGAME_DURATION_S = 30;
 const MINIGAME_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 let mgScore = 0;
 let mgTimeLeft = MINIGAME_DURATION_S;
@@ -638,9 +638,12 @@ function renderUnits(level) {
 }
 
 // ============================================================
-// DAILY CHALLENGE (mini-game): a 60s timed rapid quiz over vocab from every
+// DAILY CHALLENGE (mini-game): a 30s timed rapid quiz over vocab from every
 // unit the student has already completed, playable once per 24h. Unlocked
-// after finishing at least one unit anywhere in the curriculum.
+// after finishing at least one unit anywhere in the curriculum. Each
+// question randomly exercises one of the four skills (reading, listening,
+// speaking, writing) — speaking/writing are skipped from the random draw
+// on devices where SpeechRecognition/HanziWriter aren't available.
 // ============================================================
 function hasCompletedAnyUnit() {
   return CURRICULUM.some((level) => level.units.some((unit) => isUnitComplete(level, unit)));
@@ -703,7 +706,7 @@ function renderMiniGameCard() {
   card.className = "minigame-card ready";
   card.innerHTML = `
     <div class="mg-card-title">🎮 Daily Challenge</div>
-    <div class="mg-card-sub">Ready! Answer as many as you can in 60 seconds ⭐</div>
+    <div class="mg-card-sub">Ready! Answer as many as you can in 30 seconds ⭐</div>
   `;
   card.onclick = openMiniGameIntro;
 }
@@ -743,13 +746,27 @@ function tickMiniGame() {
   }
 }
 
-// Alternates between "reading" (see hanzi, tap the meaning) and "listening"
-// (hear it, tap the hanzi) so revision exercises both senses.
+// Speaking/writing only enter the random draw on devices that actually
+// support them (same feature checks the Speaking/Writing challenges use).
+function availableMiniGameModes() {
+  const modes = ["reading", "listening"];
+  if (SpeechRecognitionAPI) modes.push("speaking");
+  if (window.HanziWriter) modes.push("writing");
+  return modes;
+}
+
 function buildMiniGameQuestion(pool) {
-  const mode = Math.random() < 0.5 ? "reading" : "listening";
-  const field = mode === "reading" ? "meaning" : "hanzi";
+  const modes = availableMiniGameModes();
+  const mode = modes[Math.floor(Math.random() * modes.length)];
   const correct = pool[Math.floor(Math.random() * pool.length)];
 
+  // Speaking/writing score on production, not on picking an option, so they
+  // don't need a set of multiple-choice distractors.
+  if (mode === "speaking" || mode === "writing") {
+    return { mode, correct, options: [] };
+  }
+
+  const field = mode === "reading" ? "meaning" : "hanzi";
   // Prefer distractors with distinct display text — vocab repeats across
   // lessons (e.g. the Lesson 12 review set), and two options that look
   // identical would be confusing.
@@ -772,10 +789,40 @@ function buildMiniGameQuestion(pool) {
   return { mode, correct, options: shuffle([correct, ...distractors]) };
 }
 
+function mgCorrect() {
+  mgScore++;
+  $("mg-score").textContent = String(mgScore);
+  playDing();
+}
+
+// Shared by every mode: wait a beat so the student sees the feedback, then
+// move on — unless the clock (or a screen change) already ended the round.
+function mgAdvanceAfterDelay(ms) {
+  setTimeout(() => {
+    mgAnswering = false;
+    if (mgActive && mgTimeLeft > 0) renderMiniGameQuestion();
+  }, ms);
+}
+
+function mgSkip() {
+  if (mgAnswering || !mgActive) return;
+  mgAnswering = true;
+  mgAdvanceAfterDelay(150);
+}
+
 function renderMiniGameQuestion() {
   mgQuestion = buildMiniGameQuestion(mgPool);
   const q = mgQuestion;
+  $("mg-options").innerHTML = "";
+  $("mg-skip-btn").style.display = "none";
 
+  if (q.mode === "reading" || q.mode === "listening") renderMiniGameMcq(q);
+  else if (q.mode === "speaking") renderMiniGameSpeaking(q);
+  else renderMiniGameWriting(q);
+}
+
+// ---- reading / listening: multiple-choice --------------------------------
+function renderMiniGameMcq(q) {
   $("mg-mode-label").textContent = q.mode === "reading" ? "📖 Tap the meaning" : "👂 Tap what you hear";
   $("mg-prompt").innerHTML =
     q.mode === "reading"
@@ -787,28 +834,24 @@ function renderMiniGameQuestion() {
   }
 
   const opts = $("mg-options");
-  opts.innerHTML = "";
   q.options.forEach((opt) => {
     const btn = document.createElement("button");
     btn.className = "opt-btn" + (q.mode === "reading" ? " opt-meaning" : "");
     btn.textContent = q.mode === "reading" ? opt.meaning : opt.hanzi;
-    btn.addEventListener("click", () => answerMiniGame(btn, opt));
+    btn.addEventListener("click", () => answerMiniGameMcq(btn, opt, q));
     opts.appendChild(btn);
   });
 }
 
-function answerMiniGame(btn, chosen) {
+function answerMiniGameMcq(btn, chosen, q) {
   if (mgAnswering || !mgActive) return;
   mgAnswering = true;
   document.querySelectorAll("#mg-options .opt-btn").forEach((b) => (b.disabled = true));
 
-  const correct = mgQuestion.correct;
-  const correctLabel = mgQuestion.mode === "reading" ? correct.meaning : correct.hanzi;
-  if (chosen === correct) {
+  const correctLabel = q.mode === "reading" ? q.correct.meaning : q.correct.hanzi;
+  if (chosen === q.correct) {
     btn.classList.add("correct");
-    mgScore++;
-    $("mg-score").textContent = String(mgScore);
-    playDing();
+    mgCorrect();
   } else {
     btn.classList.add("incorrect");
     document.querySelectorAll("#mg-options .opt-btn").forEach((b) => {
@@ -816,11 +859,120 @@ function answerMiniGame(btn, chosen) {
     });
     playError();
   }
+  mgAdvanceAfterDelay(500);
+}
 
-  setTimeout(() => {
-    mgAnswering = false;
-    if (mgActive && mgTimeLeft > 0) renderMiniGameQuestion();
-  }, 500);
+// ---- speaking: hold to say it aloud, one attempt per question -------------
+function renderMiniGameSpeaking(q) {
+  $("mg-mode-label").textContent = "🗣️ Hold and say it aloud";
+  $("mg-prompt").innerHTML = `
+    <p class="hanzi mg-hanzi">${q.correct.hanzi}</p>
+    <p class="pinyin">${q.correct.pinyin}</p>
+    <button class="read-btn" id="mg-speak-btn">🎤 Hold to say it</button>
+  `;
+  $("mg-skip-btn").style.display = "";
+
+  const btn = $("mg-speak-btn");
+  let recording = false;
+  let rec = null;
+  let heardMatch = false;
+
+  const begin = (e) => {
+    e.preventDefault();
+    if (recording || mgAnswering) return;
+    recording = true;
+    heardMatch = false;
+    sfxContext();
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    btn.classList.add("recording");
+    btn.textContent = "🎙️ Recording… release to check";
+
+    try { rec = new SpeechRecognitionAPI(); } catch (err) { recording = false; return; }
+    rec.lang = "zh-CN";
+    rec.interimResults = true;
+    try { rec.continuous = true; } catch (err) {}
+    rec.maxAlternatives = 3;
+    rec.onresult = (ev) => {
+      const start = ev.resultIndex != null ? ev.resultIndex : 0;
+      for (let i = start; i < ev.results.length; i++) {
+        const r = ev.results[i];
+        for (let j = 0; j < r.length; j++) {
+          if (readingMatches(r[j].transcript, q.correct)) heardMatch = true;
+        }
+      }
+    };
+    try { rec.start(); } catch (err) {}
+  };
+
+  const end = () => {
+    if (!recording) return;
+    recording = false;
+    btn.classList.remove("recording");
+    btn.textContent = "🎤 Hold to say it";
+    if (rec) { try { rec.stop(); } catch (err) {} }
+
+    // Shorter than the flashcards' 700ms grace period — keep the timed
+    // round snappy since every second here counts toward the score.
+    setTimeout(() => {
+      if (mgAnswering || !mgActive) return;
+      mgAnswering = true;
+      btn.disabled = true;
+      if (heardMatch) {
+        btn.classList.add("correct");
+        mgCorrect();
+      } else {
+        btn.classList.add("incorrect");
+        playError();
+      }
+      mgAdvanceAfterDelay(500);
+    }, 500);
+  };
+
+  btn.addEventListener("pointerdown", begin);
+  btn.addEventListener("pointerup", end);
+  btn.addEventListener("pointercancel", end);
+  btn.addEventListener("contextmenu", (e) => e.preventDefault());
+}
+
+// ---- writing: trace the character (HanziWriter), one word per question ----
+function renderMiniGameWriting(q) {
+  $("mg-mode-label").textContent = "✍️ Trace the character";
+  $("mg-skip-btn").style.display = "";
+  $("mg-prompt").innerHTML = `
+    <p class="pinyin">${q.correct.pinyin}</p>
+    <p class="numeral">${q.correct.meaning}</p>
+    <div class="writing-targets" id="mg-writing-targets"></div>
+  `;
+
+  const wrap = $("mg-writing-targets");
+  const chars = Array.from(q.correct.hanzi);
+  const size = chars.length > 1 ? 100 : 140;
+  let completed = 0;
+  chars.forEach((ch) => {
+    const cell = document.createElement("div");
+    cell.className = "writing-cell";
+    wrap.appendChild(cell);
+    const writer = window.HanziWriter.create(cell, ch, {
+      width: size,
+      height: size,
+      padding: 6,
+      showCharacter: false,
+      showOutline: true,
+      showHintAfterMisses: 3,
+      highlightOnComplete: true,
+      drawingWidth: 24,
+    });
+    writer.quiz({
+      onComplete: () => {
+        completed++;
+        if (completed === chars.length && mgActive && !mgAnswering) {
+          mgAnswering = true;
+          mgCorrect();
+          mgAdvanceAfterDelay(700);
+        }
+      },
+    });
+  });
 }
 
 function finishMiniGame() {
@@ -846,6 +998,7 @@ function finishMiniGame() {
 $("mg-start-btn").addEventListener("click", startMiniGame);
 $("mg-intro-back-btn").addEventListener("click", goHome);
 $("mg-done-continue").addEventListener("click", goHome);
+$("mg-skip-btn").addEventListener("click", mgSkip);
 
 // Preview-only test entry point (button is CSS-hidden outside preview mode):
 // skips the unit-completion + cooldown gate entirely so the mini-game can be
