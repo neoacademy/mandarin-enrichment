@@ -66,6 +66,22 @@ select, input[type=text] {
 .progress-dots { display: flex; gap: 6px; margin: 16px 0; flex-wrap: wrap; justify-content: center; max-width: 320px; }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: #E5E5E5; }
 .dot.done { background: #E8491D; }
+.dot.read { background: #FFC107; }
+
+/* Flashcard "hear it / read it" actions + speech-recognition feedback */
+.fc-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.read-btn { background: #4CAF50; color: white; font-size: 1.4rem; }
+.read-btn.listening { background: #4A90D9; }
+.fc-read-feedback {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  max-width: 340px;
+}
+.fc-read-feedback.listening { color: #4A90D9; }
+.fc-read-feedback.correct { color: #4CAF50; }
+.fc-read-feedback.retry { color: #E8491D; }
 
 .nav-row { display: flex; gap: 8px; }
 

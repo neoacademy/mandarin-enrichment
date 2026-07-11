@@ -145,6 +145,16 @@ let quizQuestions = [];
 let matchSelectedHanzi = null;
 let matchedCount = 0;
 
+// Tracks which vocab ids the student pronounced correctly during the current
+// flashcards run, so we can reward them and show a read-aloud tally.
+let fcReadCorrect = new Set();
+
+// Web Speech API for the flashcard "Read it" pronunciation check. Safari on
+// iPad supports it (webkit-prefixed); it needs mic permission + a network
+// connection. Feature-detected so the button hides where it's unavailable.
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let fcRecognizing = false;
+
 // The sign-in page's "Preview the student app" button opens this page with
 // ?preview=1, which puts it into a no-login sandbox: no Google sign-in is
 // required, the real identity and saved progress are ignored, and nothing is
@@ -487,7 +497,10 @@ $("cd-continue").addEventListener("click", () => {
 // ============================================================
 function startFlashcards(unit) {
   fcIndex = 0;
-  $("fc-title").textContent = "Learn";
+  fcReadCorrect = new Set();
+  $("fc-title").textContent = "Learn — then read each word aloud 🎤";
+  // Hide the "Read it" button entirely where speech recognition isn't available.
+  $("fc-read").style.display = SpeechRecognitionAPI ? "" : "none";
   renderFlashcard(unit);
   showScreen("screen-flashcards");
 }
@@ -500,17 +513,137 @@ function renderFlashcard(unit) {
   $("fc-numeral").textContent = item.meaning;
   $("fc-prev").disabled = fcIndex === 0;
   $("fc-next").textContent = fcIndex === vocab.length - 1 ? "Finish" : "Next";
+  setReadFeedback("", "");
+  resetReadButton();
+  renderFlashcardDots();
+}
 
+function renderFlashcardDots() {
+  const vocab = currentUnit.vocab;
   const dots = $("fc-dots");
   dots.innerHTML = "";
-  vocab.forEach((_, i) => {
+  vocab.forEach((v, i) => {
     const d = document.createElement("div");
-    d.className = "dot" + (i <= fcIndex ? " done" : "");
+    d.className =
+      "dot" + (i <= fcIndex ? " done" : "") + (fcReadCorrect.has(v.id) ? " read" : "");
     dots.appendChild(d);
   });
 }
 
+function finishFlashcards() {
+  const total = currentUnit.vocab.length;
+  const readCount = currentUnit.vocab.filter((v) => fcReadCorrect.has(v.id)).length;
+  const message =
+    readCount > 0
+      ? `You read ${readCount}/${total} words aloud! 🎤 Nice work!`
+      : "Nice work! Keep going.";
+  finishChallenge(currentChallenge.points, message);
+}
+
+// ---- "Read it" pronunciation check -----------------------------------------
+function setReadFeedback(state, msg) {
+  const el = $("fc-read-feedback");
+  el.className = "fc-read-feedback " + (state || "");
+  el.textContent = msg || "";
+}
+
+function resetReadButton() {
+  const btn = $("fc-read");
+  btn.disabled = false;
+  btn.classList.remove("listening");
+  btn.textContent = "🎤 Read it";
+}
+
+function normalizeSpoken(s) {
+  // Drop spaces and punctuation so "你好。" and "你好" compare equal.
+  return (s || "").replace(/[\s，。、！？,.!?·・]/g, "").trim();
+}
+
+function acceptableAnswers(item) {
+  const ans = [item.hanzi];
+  // Numbers: the recognizer may return the digit ("1") instead of 一.
+  if (/^\d+$/.test(item.meaning)) ans.push(item.meaning);
+  return ans.map(normalizeSpoken).filter(Boolean);
+}
+
+function readingMatches(heard, item) {
+  const h = normalizeSpoken(heard);
+  if (!h) return false;
+  return acceptableAnswers(item).some((t) => h === t || h.includes(t) || t.includes(h));
+}
+
+function startReading() {
+  if (!SpeechRecognitionAPI || fcRecognizing) return;
+  const target = currentUnit.vocab[fcIndex];
+
+  // Stop any text-to-speech so the mic doesn't pick up the app's own audio.
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+
+  const rec = new SpeechRecognitionAPI();
+  rec.lang = "zh-CN";
+  rec.interimResults = false;
+  rec.maxAlternatives = 3;
+
+  fcRecognizing = true;
+  const btn = $("fc-read");
+  btn.disabled = true;
+  btn.classList.add("listening");
+  btn.textContent = "🎧 Listening…";
+  setReadFeedback("listening", "Say the word now…");
+
+  rec.onresult = (e) => {
+    const alts = [];
+    const r = e.results[0];
+    for (let i = 0; i < r.length; i++) alts.push(r[i].transcript);
+    if (alts.some((a) => readingMatches(a, target))) {
+      onReadCorrect(target);
+    } else {
+      setReadFeedback("retry", `Heard “${alts[0] || "…"}”. Not quite — tap 🎤 to try again.`);
+    }
+  };
+  rec.onerror = (e) => {
+    if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+      setReadFeedback("retry", "🎤 Allow microphone access to read aloud.");
+    } else if (e.error === "no-speech") {
+      setReadFeedback("retry", "Didn't hear anything — tap 🎤 and try again.");
+    } else {
+      setReadFeedback("retry", "Didn't catch that — tap 🎤 to try again.");
+    }
+  };
+  rec.onend = () => {
+    fcRecognizing = false;
+    // Leave a correct card's reward in place; otherwise reset the button so
+    // the student can retry.
+    if (!fcReadCorrect.has(target.id)) resetReadButton();
+  };
+
+  try {
+    rec.start();
+  } catch (e) {
+    fcRecognizing = false;
+    resetReadButton();
+    setReadFeedback("retry", "Couldn't start the mic — tap 🎤 to try again.");
+  }
+}
+
+function onReadCorrect(item) {
+  fcReadCorrect.add(item.id);
+  setReadFeedback("correct", "✅ 对了! Great reading! ⭐");
+  renderFlashcardDots();
+  // Reward with momentum: after a beat, move to the next card (or finish).
+  setTimeout(() => {
+    if (item.id !== currentUnit.vocab[fcIndex].id) return; // student navigated away
+    if (fcIndex < currentUnit.vocab.length - 1) {
+      fcIndex++;
+      renderFlashcard(currentUnit);
+    } else {
+      finishFlashcards();
+    }
+  }, 1100);
+}
+
 $("fc-speak").addEventListener("click", () => speak(currentUnit.vocab[fcIndex].hanzi));
+$("fc-read").addEventListener("click", startReading);
 $("fc-prev").addEventListener("click", () => {
   if (fcIndex > 0) { fcIndex--; renderFlashcard(currentUnit); }
 });
@@ -519,7 +652,7 @@ $("fc-next").addEventListener("click", () => {
     fcIndex++;
     renderFlashcard(currentUnit);
   } else {
-    finishChallenge(currentChallenge.points, "Nice work! Keep going.");
+    finishFlashcards();
   }
 });
 
